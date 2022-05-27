@@ -14,8 +14,14 @@ Ensure that you have installed arcade:
 pip install arcade
 ```
 
-and then run the following command to play with the current simulator:
+To run our Grid Motion-based Simulator, execute this set of commands:
 
 ```bash
-cd src && python sim.py
+cd src && python grid_sim.py
+```
+
+To run our Angular Motion-based Simulator, execute this set of commands:
+
+```bash
+cd src && python angular_sim.py
 ```
