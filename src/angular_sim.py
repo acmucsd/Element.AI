@@ -4,7 +4,7 @@ Paper.IO++ Simulator
 import arcade
 import math
 
-SPRITE_SCALING = 0.1
+SPRITE_SCALING = 0.08
 
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
