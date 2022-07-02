@@ -1,18 +1,19 @@
 import arcade
 import random
+import numpy as np
 
 # https://api.arcade.academy/en/latest/examples/array_backed_grid_sprites_1.html#array-backed-grid-sprites-1
 # https://api.arcade.academy/en/2.6.0/examples/sprite_move_keyboard.html
 
 # Set how many rows and columns we will have
-ROW_COUNT = 40
-COLUMN_COUNT = 40
+ROW_COUNT = 80
+COLUMN_COUNT = 80
 
 SPRITE_SCALING = 0.5
 
 # This sets the WIDTH and HEIGHT of each grid location
-WIDTH = 40
-HEIGHT = 20
+WIDTH = 8
+HEIGHT = 5
 
 # This sets the margin between each cell
 # and on the edges of the screen.
@@ -25,30 +26,45 @@ SCREEN_TITLE = "yoooo"
 
 MOVEMENT_SPEED = 3
 
+DIRECTIONS = ((0,1), (1,0), (0,-1), (-1,0))
+
 class Player(arcade.Sprite):
     """ Player Class """
 
+    def initialize(self):
+        x = random.randrange(0, ROW_COUNT)
+        y = random.randrange(0, COLUMN_COUNT)
+        self.center_x = x * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN)
+        self.center_y = y * (HEIGHT + MARGIN) + (HEIGHT / 2 + MARGIN)
+        self.pos= (x, y)
+        self.actual_x = self.center_x
+        self.actual_y = self.center_y
+        self.direction = random.randrange(0,4) # pick a random starting direction
+        self.reset=False
+        self.path = set()
+
+    def snap(self):
+        x = (self.actual_x - (WIDTH / 2 + MARGIN))// (WIDTH + MARGIN)
+        y = (self.actual_y - (HEIGHT / 2 + MARGIN))// (HEIGHT + MARGIN)
+        self.center_x = int(x) * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN)
+        self.center_y = int(y) * (HEIGHT + MARGIN) + (HEIGHT / 2 + MARGIN)
+        self.pos = (int(x), int(y))
+        self.path.add(self.pos)
+
     def update(self):
         """ Move the player """
-        # Move player.
-        # Remove these lines if physics engine is moving player.
-        self.center_x += self.change_x
-        self.center_y += self.change_y
 
-        # Check for out-of-bounds
-        if self.left < 0:
-            self.left = 0
-        elif self.right > SCREEN_WIDTH - 1:
-            self.right = SCREEN_WIDTH - 1
+        self.direction += int(self.change_x)
+        self.direction = (self.direction+4) % len(DIRECTIONS)
 
-        if self.bottom < 0:
-            self.bottom = 0
-        elif self.top > SCREEN_HEIGHT - 1:
-            self.top = SCREEN_HEIGHT - 1
+        self.actual_x += DIRECTIONS[self.direction][0]*MOVEMENT_SPEED
+        self.actual_y += DIRECTIONS[self.direction][1]*MOVEMENT_SPEED
+        self.snap()
 
-        gridx = (self.center_x - (WIDTH / 2 + MARGIN))// (WIDTH + MARGIN)
-        gridy = (self.center_y - (HEIGHT / 2 + MARGIN))// (HEIGHT + MARGIN)
-        self.pos = (int(gridx), int(gridy))
+        x,y = self.pos
+        if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
+            self.reset = True
+
 
 class MyGame(arcade.Window):
     """
@@ -61,29 +77,7 @@ class MyGame(arcade.Window):
         """
         super().__init__(width, height, title)
 
-        # Create a 2 dimensional array. A two dimensional
-        # array is simply a list of lists.
-        # This array can be altered later to contain 0 or 1
-        # to show a white or green cell.
-        #
-        # A 4 x 4 grid would look like this
-        #
-        # grid = [
-        #     [0, 0, 0, 0],
-        #     [0, 0, 0, 0],
-        #     [0, 0, 0, 0],
-        #     [0, 0, 0, 0],
-        # ]
-        # We can quickly build a grid with python list comprehension
-        # self.grid = [[0] * COLUMN_COUNT for _ in range(ROW_COUNT)]
-        # Making the grid with loops:
-        self.grid = []
-        for row in range(ROW_COUNT):
-            # Add an empty array that will hold each cell
-            # in this row
-            self.grid.append([])
-            for column in range(COLUMN_COUNT):
-                self.grid[row].append(0)  # Append a cell
+        self.grid = np.zeros((ROW_COUNT, COLUMN_COUNT))
 
         # Set the window's background color
         self.background_color = arcade.color.BLACK
@@ -111,30 +105,13 @@ class MyGame(arcade.Window):
 
         # Set up the player
         self.player_sprite = Player(":resources:images/animated_characters/female_person/femalePerson_idle.png", SPRITE_SCALING)
-        x = random.randrange(0, ROW_COUNT)
-        y = random.randrange(0, COLUMN_COUNT)
-        self.player_sprite.center_x = x * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN)
-        self.player_sprite.center_y = y * (HEIGHT + MARGIN) + (HEIGHT / 2 + MARGIN)
-        self.player_sprite.pos= (x, y) # should be randomized later on
+        self.player_sprite.initialize()
         self.player_list.append(self.player_sprite)
 
     def resync_grid_with_sprites(self):
-        """
-        Update the color of all the sprites to match
-        the color/stats in the grid.
 
-        We look at the values in each cell.
-        If the cell contains 0 we assign a white color.
-        If the cell contains 1 we assign a green color.
-        """
         for row in range(ROW_COUNT):
             for column in range(COLUMN_COUNT):
-                # We need to convert our two dimensional grid to our
-                # one-dimensional sprite list. For example a 10x10 grid might have
-                # row 2, column 8 mapped to location 28. (Zero-basing throws things
-                # off, but you get the idea.)
-                # ALTERNATIVELY you could set self.grid_sprite_list[pos].texture
-                # to different textures to change the image instead of the color.
                 pos = row * COLUMN_COUNT + column
                 if self.grid[row][column] == 0:
                     self.grid_sprite_list[pos].color = arcade.color.WHITE
@@ -159,34 +136,27 @@ class MyGame(arcade.Window):
 
         # Move the player
         self.player_list.update()
-        c, r = self.player_sprite.pos
-        self.grid[r][c] = 1
-        self.resync_grid_with_sprites()
-
-    def on_key_press(self, key, modifiers):
-        """Called whenever a key is pressed. """
-
-        # If the player presses a key, update the speed
-        if key == arcade.key.UP:
-            self.player_sprite.change_y = MOVEMENT_SPEED
-        elif key == arcade.key.DOWN:
-            self.player_sprite.change_y = -MOVEMENT_SPEED
-        elif key == arcade.key.LEFT:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player_sprite.change_x = MOVEMENT_SPEED
+        if self.player_sprite.reset:
+            self.reset()
+        else:
+            c, r = self.player_sprite.pos
+            self.grid[r][c] = 1
+            self.resync_grid_with_sprites()
+            self.player_sprite.change_x=0
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
 
-        # If a player releases a key, zero out the speed.
-        # This doesn't work well if multiple keys are pressed.
-        # Use 'better move by keyboard' example if you need to
-        # handle this.
-        if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.player_sprite.change_y = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.player_sprite.change_x = 0
+        if key == arcade.key.LEFT:
+            self.player_sprite.change_x -= 1
+        elif key == arcade.key.RIGHT:
+            self.player_sprite.change_x += 1
+
+    def reset(self):
+        self.player_sprite.initialize()
+        self.grid = self.grid*0
+        self.resync_grid_with_sprites()
+
 
 def main():
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
