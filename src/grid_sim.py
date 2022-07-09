@@ -1,7 +1,7 @@
 import arcade
 import random
 import numpy as np
-
+import collections
 # https://api.arcade.academy/en/latest/examples/array_backed_grid_sprites_1.html#array-backed-grid-sprites-1
 # https://api.arcade.academy/en/2.6.0/examples/sprite_move_keyboard.html
 
@@ -26,6 +26,10 @@ SCREEN_TITLE = "yoooo"
 
 MOVEMENT_SPEED = 3
 
+UNOCCUPIED = 0
+PASSED = 1
+OCCUPIED = 2
+
 DIRECTIONS = ((0,1), (1,0), (0,-1), (-1,0))
 
 class Player(arcade.Sprite):
@@ -41,6 +45,7 @@ class Player(arcade.Sprite):
         self.actual_y = self.center_y
         self.direction = random.randrange(0,4) # pick a random starting direction
         self.reset=False
+        self.lastUnoccupied = False
         self.path = set()
 
     def snap(self):
@@ -64,7 +69,7 @@ class Player(arcade.Sprite):
         x,y = self.pos
         if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
             self.reset = True
-
+        
 
 class MyGame(arcade.Window):
     """
@@ -107,16 +112,27 @@ class MyGame(arcade.Window):
         self.player_sprite = Player(":resources:images/animated_characters/female_person/femalePerson_idle.png", SPRITE_SCALING)
         self.player_sprite.initialize()
         self.player_list.append(self.player_sprite)
+        c, r = self.player_sprite.pos
+        try:
+            for cc in range(c-1, c + 2):
+                for rr in range(r-1, r + 2):
+                    self.grid[rr][cc] = OCCUPIED
+        except:
+            pass
 
     def resync_grid_with_sprites(self):
 
         for row in range(ROW_COUNT):
             for column in range(COLUMN_COUNT):
                 pos = row * COLUMN_COUNT + column
-                if self.grid[row][column] == 0:
+                if self.grid[row][column] == UNOCCUPIED:
                     self.grid_sprite_list[pos].color = arcade.color.WHITE
-                else:
+                elif self.grid[row][column] == PASSED:
                     self.grid_sprite_list[pos].color = arcade.color.GREEN
+                elif self.grid[row][column] == OCCUPIED:
+                    self.grid_sprite_list[pos].color = arcade.color.RED
+                else:
+                    raise Exception("Unknown grid value")
 
     def on_draw(self):
         """
@@ -140,7 +156,18 @@ class MyGame(arcade.Window):
             self.reset()
         else:
             c, r = self.player_sprite.pos
-            self.grid[r][c] = 1
+            if self.grid[r][c] == PASSED:
+                pass # handle colision here
+            elif self.grid[r][c] == OCCUPIED:
+                if self.player_sprite.lastUnoccupied:
+                    self.update_occupancy()
+                    self.player_sprite.lastUnoccupied = False
+            elif self.grid[r][c] == UNOCCUPIED:
+                self.grid[r][c] = PASSED
+                self.player_sprite.lastUnoccupied = True
+            else:
+                raise Exception("Unknown grid value")
+                
             self.resync_grid_with_sprites()
             self.player_sprite.change_x=0
 
@@ -156,6 +183,34 @@ class MyGame(arcade.Window):
         self.player_sprite.initialize()
         self.grid = self.grid*0
         self.resync_grid_with_sprites()
+        c, r = self.player_sprite.pos
+        try:
+            for cc in range(c-1, c + 2):
+                for rr in range(r-1, r + 2):
+                    self.grid[rr][cc] = OCCUPIED
+        except:
+            pass
+
+    def update_occupancy(self):
+        queue = collections.deque([])
+        for r in range(ROW_COUNT):
+            for c in range(COLUMN_COUNT):
+                if (r in [0, ROW_COUNT-1] or c in [0, COLUMN_COUNT-1]) and self.grid[r][c] == UNOCCUPIED:
+                    queue.append((r, c))
+        while queue:
+            r, c = queue.popleft()
+            if 0<=r<ROW_COUNT and 0<=c<COLUMN_COUNT and self.grid[r][c] == UNOCCUPIED:
+                self.grid[r][c] = -1
+                queue.extend([(r-1, c),(r+1, c),(r, c-1),(r, c+1)])
+        
+        for r in range(ROW_COUNT):
+            for c in range(COLUMN_COUNT):
+                if self.grid[r][c] == UNOCCUPIED or self.grid[r][c] == PASSED:
+                    self.grid[r][c] = OCCUPIED
+                elif self.grid[r][c] == -1:
+                    self.grid[r][c] = UNOCCUPIED
+                        
+        
 
 
 def main():
