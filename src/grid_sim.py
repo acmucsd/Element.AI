@@ -36,17 +36,21 @@ class Player(arcade.Sprite):
     """ Player Class """
 
     def initialize(self):
-        x = random.randrange(0, ROW_COUNT)
-        y = random.randrange(0, COLUMN_COUNT)
+        x = random.randrange(0+3, ROW_COUNT-3)
+        y = random.randrange(0+3, COLUMN_COUNT-3)
         self.center_x = x * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN)
         self.center_y = y * (HEIGHT + MARGIN) + (HEIGHT / 2 + MARGIN)
-        self.pos= (x, y)
+
+        self.pos = (x, y)
+        self.path = set()
+        self.zone = set()
+
         self.actual_x = self.center_x
         self.actual_y = self.center_y
         self.direction = random.randrange(0,4) # pick a random starting direction
         self.reset=False
         self.lastUnoccupied = False
-        self.path = set()
+        
 
     def snap(self):
         x = (self.actual_x - (WIDTH / 2 + MARGIN))// (WIDTH + MARGIN)
@@ -54,7 +58,6 @@ class Player(arcade.Sprite):
         self.center_x = int(x) * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN)
         self.center_y = int(y) * (HEIGHT + MARGIN) + (HEIGHT / 2 + MARGIN)
         self.pos = (int(x), int(y))
-        self.path.add(self.pos)
 
     def update(self):
         """ Move the player """
@@ -62,13 +65,39 @@ class Player(arcade.Sprite):
         self.direction += int(self.change_x)
         self.direction = (self.direction+4) % len(DIRECTIONS)
 
+        self.old_pos = self.pos
+        self.old_path = self.path
+        self.old_zone = self.zone
+
         self.actual_x += DIRECTIONS[self.direction][0]*MOVEMENT_SPEED
         self.actual_y += DIRECTIONS[self.direction][1]*MOVEMENT_SPEED
         self.snap()
 
+        if (self.old_pos != self.pos or self.old_path != self.path or self.old_zone != self.zone):
+            print(f"pos\t{self.pos}")
+            print(f"path\t{self.path}")
+            print(f"zone\t{self.zone}")
+
         x,y = self.pos
         if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
             self.reset = True
+    
+    def pop_zone(self, pos):
+        self.zone.discard(pos)
+    def push_zone(self, pos):
+        self.zone.add(pos)
+        self.path.discard(pos)
+    
+    def push_path(self, pos):
+        self.path.add(pos)
+    def pop_path(self, pos):
+        self.path.discard(pos)
+
+    def validCollision(self):
+        if (self.old_pos == self.pos):
+            return False
+        
+        return True
         
 
 class MyGame(arcade.Window):
@@ -157,13 +186,15 @@ class MyGame(arcade.Window):
         else:
             c, r = self.player_sprite.pos
             if self.grid[r][c] == PASSED:
-                pass # handle colision here
+                if (self.player_sprite.validCollision()):
+                    self.player_sprite.reset = True
             elif self.grid[r][c] == OCCUPIED:
                 if self.player_sprite.lastUnoccupied:
                     self.update_occupancy()
                     self.player_sprite.lastUnoccupied = False
             elif self.grid[r][c] == UNOCCUPIED:
                 self.grid[r][c] = PASSED
+                self.player_sprite.push_path((c,r))
                 self.player_sprite.lastUnoccupied = True
             else:
                 raise Exception("Unknown grid value")
@@ -207,6 +238,7 @@ class MyGame(arcade.Window):
             for c in range(COLUMN_COUNT):
                 if self.grid[r][c] == UNOCCUPIED or self.grid[r][c] == PASSED:
                     self.grid[r][c] = OCCUPIED
+                    self.player_sprite.push_zone((c,r))
                 elif self.grid[r][c] == -1:
                     self.grid[r][c] = UNOCCUPIED
                         
