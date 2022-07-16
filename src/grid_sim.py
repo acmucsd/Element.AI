@@ -24,18 +24,23 @@ SCREEN_WIDTH = (WIDTH + MARGIN) * COLUMN_COUNT + MARGIN
 SCREEN_HEIGHT = (HEIGHT + MARGIN) * ROW_COUNT + MARGIN
 SCREEN_TITLE = "yoooo"
 
-MOVEMENT_SPEED = 3
-
 UNOCCUPIED = 0
 PASSED = 1
 OCCUPIED = 2
+BOMB = 3
+BOOST = 4
 
 DIRECTIONS = ((0,1), (1,0), (0,-1), (-1,0))
+
+BOMB_COUNT = 0
+BOOST_COUNT = 40
 
 class Player(arcade.Sprite):
     """ Player Class """
 
     def initialize(self):
+
+        self.movement_speed = 3
         x = random.randrange(0+3, ROW_COUNT-3)
         y = random.randrange(0+3, COLUMN_COUNT-3)
         self.center_x = x * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN)
@@ -50,7 +55,7 @@ class Player(arcade.Sprite):
         self.direction = random.randrange(0,4) # pick a random starting direction
         self.reset=False
         self.lastUnoccupied = False
-        
+
 
     def snap(self):
         x = (self.actual_x - (WIDTH / 2 + MARGIN))// (WIDTH + MARGIN)
@@ -69,25 +74,25 @@ class Player(arcade.Sprite):
         self.old_path = self.path
         self.old_zone = self.zone
 
-        self.actual_x += DIRECTIONS[self.direction][0]*MOVEMENT_SPEED
-        self.actual_y += DIRECTIONS[self.direction][1]*MOVEMENT_SPEED
+        self.actual_x += DIRECTIONS[self.direction][0]*self.movement_speed
+        self.actual_y += DIRECTIONS[self.direction][1]*self.movement_speed
         self.snap()
 
-        if (self.old_pos != self.pos or self.old_path != self.path or self.old_zone != self.zone):
-            print(f"pos\t{self.pos}")
-            print(f"path\t{self.path}")
-            print(f"zone\t{self.zone}")
+        # if (self.old_pos != self.pos or self.old_path != self.path or self.old_zone != self.zone):
+        #     print(f"pos\t{self.pos}")
+        #     print(f"path\t{self.path}")
+        #     print(f"zone\t{self.zone}")
 
         x,y = self.pos
         if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
             self.reset = True
-    
+
     def pop_zone(self, pos):
         self.zone.discard(pos)
     def push_zone(self, pos):
         self.zone.add(pos)
         self.path.discard(pos)
-    
+
     def push_path(self, pos):
         self.path.add(pos)
     def pop_path(self, pos):
@@ -96,9 +101,9 @@ class Player(arcade.Sprite):
     def validCollision(self):
         if (self.old_pos == self.pos):
             return False
-        
+
         return True
-        
+
 
 class MyGame(arcade.Window):
     """
@@ -142,12 +147,10 @@ class MyGame(arcade.Window):
         self.player_sprite.initialize()
         self.player_list.append(self.player_sprite)
         c, r = self.player_sprite.pos
-        try:
-            for cc in range(c-1, c + 2):
-                for rr in range(r-1, r + 2):
-                    self.grid[rr][cc] = OCCUPIED
-        except:
-            pass
+        for cc in range(c-1, c + 2):
+            for rr in range(r-1, r + 2):
+                self.grid[rr][cc] = OCCUPIED
+        self.place_boost_bomb()
 
     def resync_grid_with_sprites(self):
 
@@ -160,6 +163,10 @@ class MyGame(arcade.Window):
                     self.grid_sprite_list[pos].color = arcade.color.GREEN
                 elif self.grid[row][column] == OCCUPIED:
                     self.grid_sprite_list[pos].color = arcade.color.RED
+                elif self.grid[row][column] == BOMB:
+                    self.grid_sprite_list[pos].color = arcade.color.BLACK
+                elif self.grid[row][column] == BOOST:
+                    self.grid_sprite_list[pos].color = arcade.color.PURPLE
                 else:
                     raise Exception("Unknown grid value")
 
@@ -196,9 +203,17 @@ class MyGame(arcade.Window):
                 self.grid[r][c] = PASSED
                 self.player_sprite.push_path((c,r))
                 self.player_sprite.lastUnoccupied = True
+            elif self.grid[r][c] == BOMB:
+                self.player_sprite.reset = True
+                self.grid[r][c] = PASSED
+            elif self.grid[r][c] == BOOST:
+                self.grid[r][c] = PASSED
+                self.player_sprite.push_path((c,r))
+                self.player_sprite.lastUnoccupied = True
+                self.player_sprite.movement_speed+=1
             else:
                 raise Exception("Unknown grid value")
-                
+
             self.resync_grid_with_sprites()
             self.player_sprite.change_x=0
 
@@ -213,14 +228,29 @@ class MyGame(arcade.Window):
     def reset(self):
         self.player_sprite.initialize()
         self.grid = self.grid*0
-        self.resync_grid_with_sprites()
         c, r = self.player_sprite.pos
-        try:
-            for cc in range(c-1, c + 2):
-                for rr in range(r-1, r + 2):
-                    self.grid[rr][cc] = OCCUPIED
-        except:
-            pass
+        for cc in range(c-1, c + 2):
+            for rr in range(r-1, r + 2):
+                self.grid[rr][cc] = OCCUPIED
+        self.place_boost_bomb()
+        self.resync_grid_with_sprites()
+
+    def place_boost_bomb(self, boost_count = BOOST_COUNT, bomb_count=BOMB_COUNT):
+        # place boosts
+        while (boost_count>0):
+            x = random.randrange(0, ROW_COUNT)
+            y = random.randrange(0, COLUMN_COUNT)
+            if(self.grid[x][y]==0):
+                self.grid[x][y]= BOOST
+                boost_count-=1
+
+        # place bombs
+        while (bomb_count>0):
+            x = random.randrange(0, ROW_COUNT)
+            y = random.randrange(0, COLUMN_COUNT)
+            if(self.grid[x][y]==0):
+                self.grid[x][y]= BOMB
+                bomb_count-=1
 
     def update_occupancy(self):
         queue = collections.deque([])
@@ -233,7 +263,7 @@ class MyGame(arcade.Window):
             if 0<=r<ROW_COUNT and 0<=c<COLUMN_COUNT and self.grid[r][c] == UNOCCUPIED:
                 self.grid[r][c] = -1
                 queue.extend([(r-1, c),(r+1, c),(r, c-1),(r, c+1)])
-        
+
         for r in range(ROW_COUNT):
             for c in range(COLUMN_COUNT):
                 if self.grid[r][c] == UNOCCUPIED or self.grid[r][c] == PASSED:
@@ -241,8 +271,8 @@ class MyGame(arcade.Window):
                     self.player_sprite.push_zone((c,r))
                 elif self.grid[r][c] == -1:
                     self.grid[r][c] = UNOCCUPIED
-                        
-        
+
+
 
 
 def main():
