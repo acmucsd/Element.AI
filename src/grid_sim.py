@@ -134,7 +134,7 @@ class MyGame(arcade.Window):
         self.grid_sprite_list = arcade.SpriteList()
 
         self.player_list = None
-        self.num_players = 2
+        self.num_players = 4
         self.starting_coords = [
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)), 
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)*3), 
@@ -222,8 +222,11 @@ class MyGame(arcade.Window):
 
                 if (c < 0 or r < 0 or COLUMN_COUNT <= c or ROW_COUNT <= r):
                     self.reset_player(player)
+                elif (player.reset):
+                    pass
                 else:
                     player_cell = self.grid[r][c]
+
                     if player_cell == PASSED:
                         if (player.validCollision()):
                             self.reset_player(player)
