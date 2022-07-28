@@ -205,8 +205,7 @@ class MyGame(arcade.Window):
         # Batch draw all the sprites
         self.grid_sprite_list.draw()
         
-        for player_num in range(len(self.player_list)):
-            player = self.player_list[player_num]
+        for player in self.player_list:
             if (not player.reset): player.draw()
 
     def on_update(self, delta_time):
@@ -214,11 +213,11 @@ class MyGame(arcade.Window):
 
         # Move the player
         self.player_list.update()
+
         if not (False in [player.reset for player in self.player_list]):
             self.reset()
         else:
-            for player_num in range(self.num_players):
-                player = self.player_list[player_num]
+            for player in self.player_list:
                 c, r = player.pos
 
                 if (c < 0 or r < 0 or COLUMN_COUNT <= c or ROW_COUNT <= r):
@@ -251,8 +250,7 @@ class MyGame(arcade.Window):
         if key == arcade.key.ESCAPE:
             self.paused = not self.paused
             print('Game Paused' if self.paused else "Game Unpaused")
-            for player_num in range(len(self.player_list)):
-                player = self.player_list[player_num]
+            for player in self.player_list:
                 if not player.reset: player.stopped = not player.stopped
         
         if not self.paused:
