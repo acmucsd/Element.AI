@@ -106,15 +106,20 @@ class Player(arcade.Sprite):
 
     def reset_player(self):
         self.reset = True
+
+        self.old_pos = None
+        self.old_path = None
+        self.old_zone = None
+
         self.pos = None
         self.path = None
         self.zone = None
+
+        self.stopped = True
         
 
 class MyGame(arcade.Window):
-    """
-    Main application class.
-    """
+    """ Main application class. """
 
     def __init__(self, width, height, title):
         """ Set up the application. """
@@ -129,6 +134,13 @@ class MyGame(arcade.Window):
         self.grid_sprite_list = arcade.SpriteList()
 
         self.player_list = None
+        self.num_players = 2
+        self.starting_coords = [
+            (int(ROW_COUNT/4), int(COLUMN_COUNT/4)), 
+            (int(ROW_COUNT/4), int(COLUMN_COUNT/4)*3), 
+            (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)*3), 
+            (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4))
+        ]
 
         # Create a list of solid-color sprites to represent each grid location
         for row in range(ROW_COUNT):
@@ -149,22 +161,24 @@ class MyGame(arcade.Window):
         # Sprite lists
         self.player_list = arcade.SpriteList()
 
-        # Set up the player
-        self.player_list.append(Player(":resources:images/animated_characters/female_person/femalePerson_idle.png", SPRITE_SCALING))
 
+        for player_num in range(self.num_players):
+            # Set up the player
+            self.player_list.append(Player(":resources:images/animated_characters/female_person/femalePerson_idle.png", SPRITE_SCALING))
 
-        player_num = 0
-        player = self.player_list[player_num]
-        player.initialize(20, 20)
-        c, r = player.pos
-        try:
-            for cc in range(c-1, c+2):
-                for rr in range(r-1, r+2):
-                    self.grid[rr][cc] = OCCUPIED
-                    self.player_grid[rr][cc] = player
-                    player.push_zone((rr, cc))
-        except:
-            pass
+            # Set up player start
+            player = self.player_list[player_num]
+            start_x, start_y = self.starting_coords[player_num]
+            player.initialize(start_x, start_y)
+            c, r = player.pos
+            try:
+                for cc in range(c-1, c+2):
+                    for rr in range(r-1, r+2):
+                        self.grid[rr][cc] = OCCUPIED
+                        self.player_grid[rr][cc] = player
+                        player.push_zone((rr, cc))
+            except:
+                pass
 
     def resync_grid_with_sprites(self):
 
@@ -181,9 +195,8 @@ class MyGame(arcade.Window):
                     raise Exception("Unknown grid value")
 
     def on_draw(self):
-        """
-        Render the screen.
-        """
+        """ Render the screen. """
+
         # We should always start by clearing the window pixels
         self.clear()
 
@@ -191,7 +204,10 @@ class MyGame(arcade.Window):
 
         # Batch draw all the sprites
         self.grid_sprite_list.draw()
-        self.player_list.draw()
+        
+        for player_num in range(len(self.player_list)):
+            player = self.player_list[player_num]
+            if (not player.reset): player.draw()
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -201,29 +217,30 @@ class MyGame(arcade.Window):
         if not (False in [player.reset for player in self.player_list]):
             self.reset()
         else:
-            player_num = 0
-            player = self.player_list[player_num]
-            c, r = player.pos
-            player_cell = self.grid[r][c]
-            if player_cell == PASSED:
-                if (player.validCollision()):
-                    for (x,y) in np.concatenate(([player.pos], list(player.path), list(player.zone))):
-                        self.grid[x][y] = UNOCCUPIED
-                        self.player_grid[x][y] = None
-                    player.reset_player()
-            elif player_cell == OCCUPIED:
-                if player.lastUnoccupied:
-                    self.update_occupancy(player)
-                    player.lastUnoccupied = False
-            elif player_cell == UNOCCUPIED:
-                self.grid[r][c] = PASSED
-                self.player_grid[r][c] = player
-                player.push_path((c,r))
-                player.lastUnoccupied = True
-            else:
-                raise Exception("Unknown grid value")
-            
-            player.change_x=0
+            for player_num in range(self.num_players):
+                player = self.player_list[player_num]
+                c, r = player.pos
+
+                if (c < 0 or r < 0 or COLUMN_COUNT <= c or ROW_COUNT <= r):
+                    self.reset_player(player)
+                else:
+                    player_cell = self.grid[r][c]
+                    if player_cell == PASSED:
+                        if (player.validCollision()):
+                            self.reset_player(player)
+                    elif player_cell == OCCUPIED:
+                        if player.lastUnoccupied:
+                            self.update_occupancy(player)
+                            player.lastUnoccupied = False
+                    elif player_cell == UNOCCUPIED:
+                        self.grid[r][c] = PASSED
+                        self.player_grid[r][c] = player
+                        player.push_path((c,r))
+                        player.lastUnoccupied = True
+                    else:
+                        raise Exception("Unknown grid value")
+                    
+                    player.change_x=0
 
                 
             self.resync_grid_with_sprites()
@@ -235,7 +252,8 @@ class MyGame(arcade.Window):
             self.paused = not self.paused
             print('Game Paused' if self.paused else "Game Unpaused")
             for player_num in range(len(self.player_list)):
-                self.player_list[player_num].stopped = not self.player_list[player_num].stopped
+                player = self.player_list[player_num]
+                if not player.reset: player.stopped = not player.stopped
         
         if not self.paused:
             if key == arcade.key.LEFT:
@@ -250,21 +268,37 @@ class MyGame(arcade.Window):
 
     def reset(self):
 
-        player_num = 0
-        player = self.player_list[player_num]
-
-        player.initialize(20, 20)
         self.grid *= 0
+
+        for player_num in range(self.num_players):
+            player = self.player_list[player_num]
+            start_x, start_y = self.starting_coords[player_num]
+            player.initialize(start_x, start_y)
+            c, r = player.pos
+            try:
+                for cc in range(c-1, c+2):
+                    for rr in range(r-1, r+2):
+                        self.grid[rr][cc] = OCCUPIED
+                        self.player_grid[rr][cc] = player
+                        player.push_zone((rr, cc))
+            except:
+                pass
+
         self.resync_grid_with_sprites()
-        c, r = player.pos
-        try:
-            for cc in range(c-1, c+2):
-                for rr in range(r-1, r+2):
-                    self.grid[rr][cc] = OCCUPIED
-                    self.player_grid[rr][cc] = player
-                    player.push_zone((rr, cc))
-        except:
-            pass
+
+    def reset_player(self, player):
+
+        indices = np.where(self.player_grid == player)
+
+        for i in range(len(indices[0])):
+            # print(np.shape(indices))
+            x = indices[0][i]
+            y = indices[1][i]
+            self.grid[x][y] = UNOCCUPIED
+            self.player_grid[x][y] = None
+
+        player.reset_player()
+        
 
     def update_occupancy(self, player):
         queue = collections.deque([])
