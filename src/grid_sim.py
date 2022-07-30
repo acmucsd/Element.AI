@@ -48,6 +48,8 @@ class Player(arcade.Sprite):
         self.reset = False
         self.lastUnoccupied = False
 
+        self.score = -1
+
         """ Player Territory Information """
         self.pos = (x, y)
         self.path = set()
@@ -103,13 +105,7 @@ class Player(arcade.Sprite):
     def reset_player(self):
         self.reset = True
 
-        self.old_pos = None
-        self.old_path = None
-        self.old_zone = None
-
-        self.pos = None
-        self.path = None
-        self.zone = None
+        self.score = len(self.zone)
 
         self.stopped = True
         
@@ -218,7 +214,7 @@ class MyGame(arcade.Window):
         self.player_list.update()
 
         if not (False in [player.reset for player in self.player_list]):
-            self.reset()
+            self.reset_game()
         else:
 
             for player in self.player_list:
@@ -281,7 +277,7 @@ class MyGame(arcade.Window):
             elif key == arcade.key.BACKSPACE:
                 for player in self.player_list:
                     self.reset_player(player)
-                self.reset()
+                self.reset_game()
             elif len(self.player_list) > 1:
                 if key == arcade.key.A:
                     self.player_list[1].change_x -= 1
@@ -309,10 +305,6 @@ class MyGame(arcade.Window):
 
     def reset_player(self, player):
 
-        print(f"pos\t{player.pos}")
-        print(f"path\t{player.path}")
-        print(f"zone\t{player.zone}")
-
         indices = np.where(self.player_grid == player)
 
         for i in range(len(indices[0])):
@@ -323,6 +315,13 @@ class MyGame(arcade.Window):
             self.player_grid[x][y] = None
 
         player.reset_player()
+
+    def reset_game(self):
+        print("Game Results:")
+        for player in self.player_list:
+            print(f"Player {player} earned {player.score} points!")
+        print("\n")
+        self.reset()
         
 
     def update_occupancy(self, player):
