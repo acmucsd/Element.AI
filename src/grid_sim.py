@@ -130,12 +130,19 @@ class MyGame(arcade.Window):
         self.grid_sprite_list = arcade.SpriteList()
 
         self.player_list = None
-        self.num_players = 2
+        self.num_players = 4
         self.starting_coords = [
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)), 
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)*3), 
             (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)*3), 
-            (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4))
+            (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)),
+        ]
+
+        self.player_colors = [
+            (arcade.color.YELLOW_ORANGE, arcade.color.SAPPHIRE_BLUE),
+            (arcade.color.HOT_PINK, arcade.color.SAP_GREEN),
+            (arcade.color.RED_ORANGE, arcade.color.TEAL),
+            (arcade.color.GOLD, arcade.color.PURPLE_HEART),
         ]
 
         # Create a list of solid-color sprites to represent each grid location
@@ -184,9 +191,9 @@ class MyGame(arcade.Window):
                 if self.grid[r][c] == UNOCCUPIED:
                     self.grid_sprite_list[pos].color = arcade.color.WHITE
                 elif self.grid[r][c] == PASSED:
-                    self.grid_sprite_list[pos].color = arcade.color.GREEN
+                    self.grid_sprite_list[pos].color = self.player_colors[self.player_list.index(self.player_grid[r][c])][0]
                 elif self.grid[r][c] == OCCUPIED:
-                    self.grid_sprite_list[pos].color = arcade.color.RED
+                    self.grid_sprite_list[pos].color = self.player_colors[self.player_list.index(self.player_grid[r][c])][1]
                 else:
                     raise Exception("Unknown grid value")
 
@@ -227,11 +234,11 @@ class MyGame(arcade.Window):
 
                         if player_cell == PASSED:
 
-                            # reset_targets = [p for p in self.player_list if p.pos == player.pos]
+                            reset_targets = [p for p in self.player_list if p.pos == player.pos]
 
-                            # if len(reset_targets) > 1:
-                            #     for target in reset_targets:
-                            #         self.reset_player(target)
+                            if len(reset_targets) > 1:
+                                for target in reset_targets:
+                                    self.reset_player(target)
                             if (player.validCollision()):
                                 self.reset_player(player)
                         elif player_cell == OCCUPIED:
@@ -271,12 +278,15 @@ class MyGame(arcade.Window):
                 self.player_list[0].change_x -= 1
             elif key == arcade.key.RIGHT:
                 self.player_list[0].change_x += 1
-            elif len(self.player_list) > 0:
+            elif key == arcade.key.BACKSPACE:
+                for player in self.player_list:
+                    self.reset_player(player)
+                self.reset()
+            elif len(self.player_list) > 1:
                 if key == arcade.key.A:
                     self.player_list[1].change_x -= 1
                 elif key == arcade.key.D:
                     self.player_list[1].change_x += 1
-
     def reset(self):
 
         self.grid *= 0
