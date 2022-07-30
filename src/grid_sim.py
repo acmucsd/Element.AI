@@ -45,7 +45,7 @@ class Player(arcade.Sprite):
         self.actual_x = self.center_x
         self.actual_y = self.center_y
         self.direction = random.randrange(0,4) # pick a random starting direction
-        self.reset=False
+        self.reset = False
         self.lastUnoccupied = False
 
         """ Player Territory Information """
@@ -82,10 +82,6 @@ class Player(arcade.Sprite):
         #     print(f"pos\t{self.pos}")
         #     print(f"path\t{self.path}")
         #     print(f"zone\t{self.zone}")
-
-        x,y = self.pos
-        if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
-            self.reset = True
     
     def pop_zone(self, pos):
         self.zone.discard(pos)
@@ -134,7 +130,7 @@ class MyGame(arcade.Window):
         self.grid_sprite_list = arcade.SpriteList()
 
         self.player_list = None
-        self.num_players = 4
+        self.num_players = 2
         self.starting_coords = [
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)), 
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)*3), 
@@ -217,32 +213,46 @@ class MyGame(arcade.Window):
         if not (False in [player.reset for player in self.player_list]):
             self.reset()
         else:
+
             for player in self.player_list:
-                c, r = player.pos
+                if not player.reset:
+                    c, r = player.pos
 
-                if (c < 0 or r < 0 or COLUMN_COUNT <= c or ROW_COUNT <= r):
-                    self.reset_player(player)
-                elif (player.reset):
-                    pass
-                else:
-                    player_cell = self.grid[r][c]
-
-                    if player_cell == PASSED:
-                        if (player.validCollision()):
-                            self.reset_player(player)
-                    elif player_cell == OCCUPIED:
-                        if player.lastUnoccupied:
-                            self.update_occupancy(player)
-                            player.lastUnoccupied = False
-                    elif player_cell == UNOCCUPIED:
-                        self.grid[r][c] = PASSED
-                        self.player_grid[r][c] = player
-                        player.push_path((c,r))
-                        player.lastUnoccupied = True
+                    if (c < 0 or r < 0 or COLUMN_COUNT <= c or ROW_COUNT <= r):
+                        self.reset_player(player)
+                    elif (player.reset):
+                        pass
                     else:
-                        raise Exception("Unknown grid value")
-                    
-                    player.change_x=0
+                        player_cell = self.grid[r][c]
+
+                        if player_cell == PASSED:
+
+                            # reset_targets = [p for p in self.player_list if p.pos == player.pos]
+
+                            # if len(reset_targets) > 1:
+                            #     for target in reset_targets:
+                            #         self.reset_player(target)
+                            if (player.validCollision()):
+                                self.reset_player(player)
+                        elif player_cell == OCCUPIED:
+                            occupied_by = self.player_grid[r][c]
+                            if player.lastUnoccupied and  occupied_by == player:
+                                self.update_occupancy(player)
+                                player.lastUnoccupied = False
+                            elif occupied_by != player:
+                                occupied_by.pop_zone((r,c))
+                                self.grid[r][c] = PASSED
+                                self.player_grid[r][c] = player
+                                player.lastUnoccupied = True
+                        elif player_cell == UNOCCUPIED:
+                            self.grid[r][c] = PASSED
+                            self.player_grid[r][c] = player
+                            player.push_path((c,r))
+                            player.lastUnoccupied = True
+                        else:
+                            raise Exception("Unknown grid value")
+                        
+                        player.change_x=0
 
                 
             self.resync_grid_with_sprites()
@@ -289,6 +299,10 @@ class MyGame(arcade.Window):
 
     def reset_player(self, player):
 
+        print(f"pos\t{player.pos}")
+        print(f"path\t{player.path}")
+        print(f"zone\t{player.zone}")
+
         indices = np.where(self.player_grid == player)
 
         for i in range(len(indices[0])):
@@ -315,11 +329,13 @@ class MyGame(arcade.Window):
         
         for r in range(ROW_COUNT):
             for c in range(COLUMN_COUNT):
-                if self.grid[r][c] == UNOCCUPIED or self.grid[r][c] == PASSED:
+                cell = self.grid[r][c]
+                occupied_by = self.player_grid[r][c]
+                if (occupied_by == player and cell == PASSED) or cell == UNOCCUPIED:
                     self.grid[r][c] = OCCUPIED
                     self.player_grid[r][c] = player
                     player.push_zone((c,r))
-                elif self.grid[r][c] == -1:
+                elif cell == -1:
                     self.grid[r][c] = UNOCCUPIED
                     self.player_grid[r][c] = None
                         
