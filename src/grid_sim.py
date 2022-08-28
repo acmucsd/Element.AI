@@ -2,41 +2,10 @@ import arcade
 import random
 import numpy as np
 import collections
+
+from constants import *
 # https://api.arcade.academy/en/latest/examples/array_backed_grid_sprites_1.html#array-backed-grid-sprites-1
 # https://api.arcade.academy/en/2.6.0/examples/sprite_move_keyboard.html
-
-# Set how many rows and columns we will have
-ROW_COUNT = 80
-COLUMN_COUNT = 80
-
-SPRITE_SCALING = 0.5
-
-# This sets the WIDTH and HEIGHT of each grid location
-WIDTH = 10
-HEIGHT = 10
-
-# This sets the margin between each cell
-# and on the edges of the screen.
-MARGIN = 5
-
-# Do the math to figure out our screen dimensions
-SCREEN_WIDTH = (WIDTH + MARGIN) * COLUMN_COUNT + MARGIN
-SCREEN_HEIGHT = (HEIGHT + MARGIN) * ROW_COUNT + MARGIN
-SCREEN_TITLE = "yoooo"
-
-MOVEMENT_SPEED = 3
-
-TEMP = -1
-UNOCCUPIED = 0
-PASSED = 1
-OCCUPIED = 2
-BOMB = 3
-BOOST = 4
-
-DIRECTIONS = ((0,1), (1,0), (0,-1), (-1,0))
-
-BOMB_COUNT = 0
-BOOST_COUNT = 40
 
 class Player(arcade.Sprite):
     """ Player Class """
@@ -54,6 +23,7 @@ class Player(arcade.Sprite):
         self.lastUnoccupied = False
 
         self.score = -1
+        self.movement_speed = 3
 
         """ Player Territory Information """
         self.pos = (x, y)
@@ -80,14 +50,9 @@ class Player(arcade.Sprite):
         self.old_path = self.path
         self.old_zone = self.zone
 
-        self.actual_x += DIRECTIONS[self.direction][0]*MOVEMENT_SPEED * (not self.stopped)
-        self.actual_y += DIRECTIONS[self.direction][1]*MOVEMENT_SPEED * (not self.stopped)
+        self.actual_x += DIRECTIONS[self.direction][0]*self.movement_speed * (not self.stopped)
+        self.actual_y += DIRECTIONS[self.direction][1]*self.movement_speed * (not self.stopped)
         self.snap()
-
-        # if (self.old_pos != self.pos or self.old_path != self.path or self.old_zone != self.zone):
-        #     print(f"pos\t{self.pos}")
-        #     print(f"path\t{self.path}")
-        #     print(f"zone\t{self.zone}")
 
         x,y = self.pos
         if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
@@ -135,9 +100,9 @@ class MyGame(arcade.Window):
         self.player_list = None
         self.num_players = 4
         self.starting_coords = [
-            (int(ROW_COUNT/4), int(COLUMN_COUNT/4)), 
-            (int(ROW_COUNT/4), int(COLUMN_COUNT/4)*3), 
-            (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)*3), 
+            (int(ROW_COUNT/4), int(COLUMN_COUNT/4)),
+            (int(ROW_COUNT/4), int(COLUMN_COUNT/4)*3),
+            (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)*3),
             (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)),
         ]
 
@@ -193,9 +158,9 @@ class MyGame(arcade.Window):
                 pos = r * COLUMN_COUNT + c
                 if self.grid[r][c] == UNOCCUPIED:
                     self.grid_sprite_list[pos].color = arcade.color.WHITE
-                elif self.grid[row][column] == BOMB:
+                elif self.grid[r][c] == BOMB:
                     self.grid_sprite_list[pos].color = arcade.color.BLACK
-                elif self.grid[row][column] == BOOST:
+                elif self.grid[r][c] == BOOST:
                     self.grid_sprite_list[pos].color = arcade.color.PURPLE
                 elif self.grid[r][c] == PASSED:
                     self.grid_sprite_list[pos].color = self.player_colors[self.player_list.index(self.player_grid[r][c])][0]
@@ -214,7 +179,7 @@ class MyGame(arcade.Window):
 
         # Batch draw all the sprites
         self.grid_sprite_list.draw()
-        
+
         for player in self.player_list:
             if (not player.reset): player.draw()
 
@@ -265,14 +230,16 @@ class MyGame(arcade.Window):
                         elif player_cell == BOMB:
                             self.reset_player(player)
                             self.grid[r][c] = PASSED
+                            self.player_grid[r][c] = player
                         elif player_cell == BOOST:
                             self.grid[r][c] = PASSED
+                            self.player_grid[r][c] = player
                             player.push_path((c,r))
                             player.lastUnoccupied = True
                             player.movement_speed+=1
                         else:
                             raise Exception("Unknown grid value")
-                        
+
                         player.change_x=0
 
             self.resync_grid_with_sprites()
@@ -285,7 +252,7 @@ class MyGame(arcade.Window):
             print('Game Paused' if self.paused else "Game Unpaused")
             for player in self.player_list:
                 if not player.reset: player.stopped = not player.stopped
-        
+
         if not self.paused:
             if key == arcade.key.LEFT:
                 self.player_list[0].change_x -= 1
@@ -356,7 +323,7 @@ class MyGame(arcade.Window):
             print(f"Player {player} earned {player.score} points!")
         print("\n")
         self.reset()
-        
+
 
     def update_occupancy(self, player):
         queue = collections.deque([])
