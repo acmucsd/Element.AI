@@ -23,7 +23,7 @@ class Player(arcade.Sprite):
         self.lastUnoccupied = False
 
         self.score = -1
-        self.movement_speed = 3
+        self.movement_speed = INITIAL_SPEED
 
         """ Player Territory Information """
         self.pos = (x, y)
@@ -98,7 +98,7 @@ class MyGame(arcade.Window):
         self.grid_sprite_list = arcade.SpriteList()
 
         self.player_list = None
-        self.num_players = 4
+        self.num_players = NUM_PLAYERS
         self.starting_coords = [
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)),
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)*3),
@@ -106,11 +106,18 @@ class MyGame(arcade.Window):
             (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)),
         ]
 
+        # self.player_colors = [
+        #     (arcade.color.YELLOW_ORANGE, arcade.color.SAPPHIRE_BLUE),
+        #     (arcade.color.HOT_PINK, arcade.color.SAP_GREEN),
+        #     (arcade.color.RED_ORANGE, arcade.color.TEAL),
+        #     (arcade.color.GOLD, arcade.color.PURPLE_HEART),
+        # ]
+
         self.player_colors = [
-            (arcade.color.YELLOW_ORANGE, arcade.color.SAPPHIRE_BLUE),
-            (arcade.color.HOT_PINK, arcade.color.SAP_GREEN),
-            (arcade.color.RED_ORANGE, arcade.color.TEAL),
-            (arcade.color.GOLD, arcade.color.PURPLE_HEART),
+            ((114, 252, 151), (50, 168, 82)),
+            ((114, 185, 252), (35, 130, 219)),
+            ((252, 178, 114), (224, 139, 65)),
+            ((201, 132, 250), (148, 12, 245))
         ]
 
         # Create a list of solid-color sprites to represent each grid location
@@ -236,7 +243,7 @@ class MyGame(arcade.Window):
                             self.player_grid[r][c] = player
                             player.push_path((c,r))
                             player.lastUnoccupied = True
-                            player.movement_speed+=1
+                            player.movement_speed*=1.2
                         else:
                             raise Exception("Unknown grid value")
 
