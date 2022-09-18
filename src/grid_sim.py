@@ -167,10 +167,10 @@ class MyGame(arcade.Window):
                 elif self.grid[r][c] == BOOST:
                     self.grid_sprite_list[pos].color = arcade.color.PURPLE
                 elif self.grid[r][c] == PASSED:
-                    if (self.collision_lines[r][c] == 0):
-                        self.grid_sprite_list[pos].color = arcade.color.AMARANTH_PINK
-                    else:
-                        self.grid_sprite_list[pos].color = self.player_colors[self.player_list.index(self.player_grid[r][c])][0]
+                    # if (self.collision_lines[r][c] == 0):
+                    #     self.grid_sprite_list[pos].color = arcade.color.AMARANTH_PINK
+                    # else:
+                    self.grid_sprite_list[pos].color = self.player_colors[self.player_list.index(self.player_grid[r][c])][0]
                 elif self.grid[r][c] == OCCUPIED:
                     self.grid_sprite_list[pos].color = self.player_colors[self.player_list.index(self.player_grid[r][c])][1]
                 else:
@@ -234,7 +234,7 @@ class MyGame(arcade.Window):
 
     def handle_extra_occupancy(self, player, r, c, is_head):
 
-        if not (r >= 0 and c >= 0 and r <= ROW_COUNT and c <= COLUMN_COUNT) or player.reset:
+        if not (r >= 0 and c >= 0 and r < ROW_COUNT and c < COLUMN_COUNT) or player.reset:
             return
         
         player_cell = self.grid[r][c]
@@ -282,7 +282,7 @@ class MyGame(arcade.Window):
             self.player_grid[r][c] = player
             player.push_path((c,r))
             player.lastUnoccupied = True
-            player.movement_speed+=1
+            player.movement_speed*=1.2
         else:
             raise Exception("Unknown grid value")
 
