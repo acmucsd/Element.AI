@@ -1,3 +1,9 @@
+from utils import *
+from constants import *
+import random
+import numpy as np
+import collections
+import arcade
 
 x = random.randrange(0+3, ROW_COUNT-3)
 y = random.randrange(0+3, COLUMN_COUNT-3)
@@ -6,7 +12,7 @@ class Player:
     def __init__(self, x, y):
 
         """ Player Movement Location """
-        self.movement_speed = 3
+        self.movement_speed = 10 # need to adjust it to scale or something
         self.center_x, self.center_y = grid_to_abs_pos((x,y))
         self.actual_x = self.center_x
         self.actual_y = self.center_y
@@ -23,7 +29,7 @@ class Player:
         self.score = -1
 
     def snap(self):
-        x, y = abs_to_grid_pos(self.actual_x, self.actual_y)
+        x, y = abs_to_grid_pos((self.actual_x, self.actual_y))
         self.center_x, self.center_y = grid_to_abs_pos((x,y))
         self.pos = (int(x), int(y))
 
@@ -38,7 +44,9 @@ class Player:
 
         self.actual_x += DIRECTIONS[self.direction][0]*self.movement_speed
         self.actual_y += DIRECTIONS[self.direction][1]*self.movement_speed
+        print(self.pos)
         self.snap()
+        print(self.pos)
 
         x,y = self.pos
         if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
@@ -63,8 +71,54 @@ class Player:
         self.score = len(self.zone)
         self.stopped = True
 
+class RenderWindow(arcade.Window):
+    def __init__(self, width, height, title):
+        """ Set up the application. """
+        super().__init__(width, height, title)
+        self.player_colors = [
+            (arcade.color.YELLOW_ORANGE, arcade.color.SAPPHIRE_BLUE),
+            (arcade.color.HOT_PINK, arcade.color.SAP_GREEN),
+            (arcade.color.RED_ORANGE, arcade.color.TEAL),
+            (arcade.color.GOLD, arcade.color.PURPLE_HEART),
+        ]
+        self.background_color = arcade.color.BLACK
+        self.grid_sprite_list = arcade.SpriteList()
+        for row in range(ROW_COUNT):
+            for column in range(COLUMN_COUNT):
+                x = column * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN)
+                y = row * (HEIGHT + MARGIN) + (HEIGHT / 2 + MARGIN)
+                sprite = arcade.SpriteSolidColor(WIDTH, HEIGHT, arcade.color.WHITE)
+                sprite.center_x = x
+                sprite.center_y = y
+                self.grid_sprite_list.append(sprite)
+
+    def render(self, grid, player_grid, player_list):
+        for r in range(ROW_COUNT):
+            for c in range(COLUMN_COUNT):
+                pos = r * COLUMN_COUNT + c
+                if grid[r][c] == UNOCCUPIED:
+                    self.grid_sprite_list[pos].color = arcade.color.WHITE
+                elif grid[r][c] == BOMB:
+                    self.grid_sprite_list[pos].color = arcade.color.BLACK
+                elif grid[r][c] == BOOST:
+                    self.grid_sprite_list[pos].color = arcade.color.PURPLE
+                elif grid[r][c] == PASSED:
+                    self.grid_sprite_list[pos].color = self.player_colors[player_list.index(player_grid[r][c])][0]
+                elif grid[r][c] == OCCUPIED:
+                    self.grid_sprite_list[pos].color = self.player_colors[player_list.index(player_grid[r][c])][1]
+                else:
+                    raise Exception("Unknown grid value")
+
+        self.on_draw()
+        arcade.finish_render()
+        # arcade.run()
+
+    def on_draw(self):
+        arcade.start_render()
+        self.grid_sprite_list.draw()
+
 class PaperIoEnv:
-    def __init__(self):
+    def __init__(self, render=False):
         self.grid = np.zeros((ROW_COUNT, COLUMN_COUNT))
         self.player_grid = np.full((ROW_COUNT, COLUMN_COUNT), None)
         self.player_list = []
@@ -76,33 +130,36 @@ class PaperIoEnv:
             (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)*3),
             (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)),
         ]
+        self.setup()
 
-        self.player_colors = [
-            (arcade.color.YELLOW_ORANGE, arcade.color.SAPPHIRE_BLUE),
-            (arcade.color.HOT_PINK, arcade.color.SAP_GREEN),
-            (arcade.color.RED_ORANGE, arcade.color.TEAL),
-            (arcade.color.GOLD, arcade.color.PURPLE_HEART),
-        ]
+        self.renderWindow = None
+        if render:
+            self.renderWindow = RenderWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
     def setup(self):
         for player_num in range(self.num_players):
             start_x, start_y = self.starting_coords[player_num]
             self.player_list.append(Player(start_x, start_y))
+            player = self.player_list[player_num]
             c, r = player.pos
             for cc in range(c-1, c + 2):
                 for rr in range(r-1, r + 2):
                     self.grid[rr][cc] = OCCUPIED
+                    self.player_grid[rr][cc] = player
+                    player.push_zone((rr, cc))
         self.place_boost_bomb()
 
-    # direction shoulld be -1 or 1
+    # direction should be -1 or 1
     def step(self, direction):
         for player in range(len(self.player_list)):
             if player==0:
                 self.player_list[player].update(direction)
+            else:
+                continue # TODO random movement of other players
 
         for player in self.player_list:
             if player.reset:
-                continue
+                self.reset_player(player)
             c, r = player.pos
             player_cell = self.grid[r][c]
             if player_cell == PASSED:
@@ -140,6 +197,8 @@ class PaperIoEnv:
             else:
                 raise Exception("Unknown grid value")
 
+        if self.renderWindow:
+            self.render()
         return self.player_list[0], self.player_grid
 
     def reset(self):
@@ -154,7 +213,7 @@ class PaperIoEnv:
         self.setup()
 
     def render(self):
-        # TODO
+        self.renderWindow.render(self.grid, self.player_grid, self.player_list)
 
     def place_boost_bomb(self, boost_count = BOOST_COUNT, bomb_count=BOMB_COUNT):
         # place boosts
@@ -207,3 +266,12 @@ class PaperIoEnv:
                 elif cell == -1:
                     self.grid[r][c] = UNOCCUPIED
                     self.player_grid[r][c] = None
+
+if __name__ == "__main__":
+    paperio = PaperIoEnv(render=True)
+    while True:
+        for i in range(10):
+            paperio.step(0)
+        paperio.step(1)
+
+    # paperio.render()
