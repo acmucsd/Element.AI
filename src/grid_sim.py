@@ -93,7 +93,7 @@ class MyGame(arcade.Window):
         self.player_grid = np.full((ROW_COUNT, COLUMN_COUNT), None)
 
         # Set the window's background color
-        self.background_color = arcade.color.BLACK
+        self.background_color = arcade.color.GREEN
         # Create a spritelist for batch drawing all the grid sprites
         self.grid_sprite_list = arcade.SpriteList()
 
@@ -140,6 +140,7 @@ class MyGame(arcade.Window):
             player = self.player_list[player_num]
             start_x, start_y = self.starting_coords[player_num]
             player.initialize(start_x, start_y)
+            player.id = player_num
             c, r = player.pos
             try:
                 for cc in range(c-1, c+2):
@@ -176,12 +177,16 @@ class MyGame(arcade.Window):
         self.clear()
 
         arcade.start_render()
-
+        arcade.draw_rectangle_filled(10, 10, 100, 100, arcade.color.WHITE)
         # Batch draw all the sprites
         self.grid_sprite_list.draw()
 
+        cur_pox_y = HEIGHT_GAME_DIV
         for player in self.player_list:
-            if (not player.reset): player.draw()
+            if (not player.reset): 
+                player.draw()
+                self.draw_progress_bar(player, 10, cur_pox_y)
+                cur_pox_y += HEIGHT_PROGRESSBAR + HEIGHT_PROGRESSBAR_GAP
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -349,8 +354,14 @@ class MyGame(arcade.Window):
                     self.grid[r][c] = UNOCCUPIED
                     self.player_grid[r][c] = None
 
+    def draw_progress_bar(self, player, x, y):
+        progress = len(player.zone)/ (ROW_COUNT*COLUMN_COUNT)
+        arcade.draw_lrtb_rectangle_filled(x, x + WIDTH_PROGRESSBAR, y + HEIGHT_PROGRESSBAR, y , arcade.color.WHITE)
+        arcade.draw_lrtb_rectangle_filled(x, x + WIDTH_PROGRESSBAR * progress, y + HEIGHT_PROGRESSBAR, y, arcade.color.BLUE)
+        arcade.draw_text(f"{int(progress*100)}%, player {player.id}", x + WIDTH_PROGRESSBAR, y, arcade.color.BLACK, 12, width=0)
+
 def main():
-    window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    window = MyGame(WIDTH_SCREEN, HEIGHT_SCREEN, SCREEN_TITLE)
     window.setup()
     arcade.run()
 
