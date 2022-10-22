@@ -111,7 +111,7 @@ class RenderWindow(arcade.Window):
 
         self.on_draw()
         arcade.finish_render()
-        # arcade.run()
+        arcade.run()
 
     def on_draw(self):
         arcade.start_render()
