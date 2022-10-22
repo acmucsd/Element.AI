@@ -96,6 +96,7 @@ class MyGame(arcade.Window):
         self.background_color = arcade.color.GREEN
         # Create a spritelist for batch drawing all the grid sprites
         self.grid_sprite_list = arcade.SpriteList()
+        self.shadow_sprite_list = arcade.SpriteList()
 
         self.player_list = None
         self.num_players = 4
@@ -116,12 +117,17 @@ class MyGame(arcade.Window):
         # Create a list of solid-color sprites to represent each grid location
         for row in range(ROW_COUNT):
             for column in range(COLUMN_COUNT):
-                x = column * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN)
-                y = row * (HEIGHT + MARGIN) + (HEIGHT / 2 + MARGIN)
+                x = column * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN) 
+                y = row * (HEIGHT + MARGIN) + (HEIGHT / 2 + MARGIN) - HEIGHT_SHADOW
                 sprite = arcade.SpriteSolidColor(WIDTH, HEIGHT, arcade.color.WHITE)
                 sprite.center_x = x
                 sprite.center_y = y
                 self.grid_sprite_list.append(sprite)
+
+                sprite = arcade.SpriteSolidColor(WIDTH, HEIGHT_SHADOW, arcade.color.WHITE)
+                sprite.center_x = column * (WIDTH + MARGIN) + (WIDTH / 2 + MARGIN) 
+                sprite.center_y = row * (HEIGHT + MARGIN) + (HEIGHT_SHADOW / 2 + MARGIN)
+                self.shadow_sprite_list.append(sprite)
 
         """ For Testing Purposes """
         self.paused = False
@@ -169,6 +175,10 @@ class MyGame(arcade.Window):
                     self.grid_sprite_list[pos].color = self.player_colors[self.player_list.index(self.player_grid[r][c])][1]
                 else:
                     raise Exception("Unknown grid value")
+                if self.grid[r][c] == OCCUPIED and (r == 0 or not self.grid[r-1][c] == OCCUPIED):
+                    self.shadow_sprite_list[pos].color = arcade.color.BLACK
+                else:
+                    self.shadow_sprite_list[pos].color = self.grid_sprite_list[pos].color
 
     def on_draw(self):
         """ Render the screen. """
@@ -180,8 +190,9 @@ class MyGame(arcade.Window):
         arcade.draw_rectangle_filled(10, 10, 100, 100, arcade.color.WHITE)
         # Batch draw all the sprites
         self.grid_sprite_list.draw()
+        self.shadow_sprite_list.draw()
 
-        cur_pox_y = HEIGHT_GAME_DIV
+        cur_pox_y = HEIGHT_GAME_DIV + HEIGHT_PROGRESSBAR_GAP
         for player in self.player_list:
             if (not player.reset): 
                 player.draw()

@@ -20,6 +20,7 @@ SPRITE_SCALING = 0.5
 WIDTH = 10
 HEIGHT = 10
 MARGIN = 0
+HEIGHT_SHADOW = 2
 
 
 """Progress Bar Values"""
