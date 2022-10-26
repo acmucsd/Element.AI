@@ -4,7 +4,7 @@
 
 Designed by ACM AI at UCSD
 
-Competition to be hosted in Fall 2022
+Competition to be hosted in Winter Quarter 2023
 
 ## Instructions
 
