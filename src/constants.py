@@ -2,8 +2,8 @@
 DIRECTIONS = ((0,1), (1,0), (0,-1), (-1,0))
 
 """ Environment Values """
-ROW_COUNT = 80
-COLUMN_COUNT = 80
+ROW_COUNT = 40
+COLUMN_COUNT = 40
 BOMB_COUNT = 10
 BOOST_COUNT = 40
 

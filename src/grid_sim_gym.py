@@ -4,6 +4,7 @@ import random
 import numpy as np
 import collections
 import arcade
+import keyboard
 
 x = random.randrange(0+3, ROW_COUNT-3)
 y = random.randrange(0+3, COLUMN_COUNT-3)
@@ -13,8 +14,8 @@ class Player:
 
         """ Player Movement Location """
         self.movement_speed = 10 # need to adjust it to scale or something
-        self.center_x, self.center_y = grid_to_abs_pos((x,y))
-        self.actual_x = self.center_x
+        self.center_x, self.center_y = grid_to_abs_pos((x,y)) 
+        self.actual_x = self.center_x 
         self.actual_y = self.center_y
         self.direction = random.randrange(0,4) # pick a random starting direction
         self.reset=False
@@ -28,6 +29,9 @@ class Player:
         """ Player Score """
         self.score = -1
 
+        self.stopped = False
+
+    #what is the purpose of the snap function?
     def snap(self):
         x, y = abs_to_grid_pos((self.actual_x, self.actual_y))
         self.center_x, self.center_y = grid_to_abs_pos((x,y))
@@ -44,9 +48,9 @@ class Player:
 
         self.actual_x += DIRECTIONS[self.direction][0]*self.movement_speed
         self.actual_y += DIRECTIONS[self.direction][1]*self.movement_speed
-        print(self.pos)
+        #print(self.pos)
         self.snap()
-        print(self.pos)
+        #print(self.pos)
 
         x,y = self.pos
         if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
@@ -111,18 +115,19 @@ class RenderWindow(arcade.Window):
 
         self.on_draw()
         arcade.finish_render()
-        arcade.run()
+        #arcade.run()
 
     def on_draw(self):
         arcade.start_render()
         self.grid_sprite_list.draw()
 
 class PaperIoEnv:
-    def __init__(self, render=False):
+    def __init__(self, render=False, keyboard = False):
         self.grid = np.zeros((ROW_COUNT, COLUMN_COUNT))
         self.player_grid = np.full((ROW_COUNT, COLUMN_COUNT), None)
         self.player_list = []
         self.num_players = 4
+        self.pause = False
 
         self.starting_coords = [
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)),
@@ -135,6 +140,8 @@ class PaperIoEnv:
         self.renderWindow = None
         if render:
             self.renderWindow = RenderWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        if keyboard == True:
+            self.on_key_release()
 
     def setup(self):
         for player_num in range(self.num_players):
@@ -232,6 +239,17 @@ class PaperIoEnv:
                 self.grid[x][y]= BOMB
                 bomb_count-=1
 
+    def on_key_release(self):
+        while(True):
+            if (keyboard.read_key() == "left arrow" or keyboard.read_key() == "a"):
+                self.step(1)
+                print(self.player_list[0].pos)
+            elif(keyboard.read_key() == "right arrow" or keyboard.read_key() == "d"):
+                self.step(0)
+                print(self.player_list[0].pos)
+            else:
+                print("Please enter valid input")
+
     def reset_player(self, player):
         indices = np.where(self.player_grid == player)
 
@@ -268,10 +286,6 @@ class PaperIoEnv:
                     self.player_grid[r][c] = None
 
 if __name__ == "__main__":
-    paperio = PaperIoEnv(render=True)
-    while True:
-        for i in range(10):
-            paperio.step(0)
-        paperio.step(1)
+    paperio = PaperIoEnv(keyboard = True)
 
     # paperio.render()
