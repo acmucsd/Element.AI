@@ -1,7 +1,7 @@
 import arcade
 from env.utils import *
 
-ENV = "Angular"
+ENV = "Angular" # can either be "Grid" or "Angular"
 
 
 def main():
