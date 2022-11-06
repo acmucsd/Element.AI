@@ -26,4 +26,4 @@ To run our Angular Motion-based Simulator, execute this set of commands:
 cd src && python angular_sim.py
 ```
 
-![angular simulator](animations/angular_sim.gif)
+![angular simulator](figures/angular_sim.gif)

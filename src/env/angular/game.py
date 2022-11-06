@@ -1,44 +1,8 @@
-"""
-Paper.IO++ Simulator
-"""
 import arcade
-import math
+from .player import Player
+from .constants import *
 
-SPRITE_SCALING = 0.08
-
-SCREEN_WIDTH = 1600
-SCREEN_HEIGHT = 900
-SCREEN_TITLE = "Paper.IO++ Simulator"
-
-MOVEMENT_SPEED = 5
-ANGLE_SPEED = 5
-
-
-class Player(arcade.Sprite):
-    """ Player class """
-
-    def __init__(self, image, scale):
-        """ Set up the player """
-
-        # Call the parent init
-        super().__init__(image, scale)
-
-        # Create a variable to hold our speed. 'angle' is created by the parent
-        self.speed = 0
-
-    def update(self):
-        # Convert angle in degrees to radians.
-        angle_rad = math.radians(self.angle)
-
-        # Rotate the agent
-        self.angle += self.change_angle
-
-        # Use math to find our change based on our speed and angle
-        self.center_x += -self.speed * math.sin(angle_rad)
-        self.center_y += self.speed * math.cos(angle_rad)
-
-
-class MyGame(arcade.Window):
+class AngularEnv(arcade.Window):
     """
     Main application class.
     """
@@ -58,7 +22,7 @@ class MyGame(arcade.Window):
         self.player_sprite = None
 
         # Set the background color
-        arcade.set_background_color(arcade.color.BLACK)
+        arcade.set_background_color(arcade.color.WHITE_SMOKE)
 
     def setup(self):
         """ Set up the game and initialize the variables. """
@@ -67,7 +31,7 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
 
         # Set up the player
-        self.player_sprite = Player("../assets/ice-cube.png", SPRITE_SCALING)
+        self.player_sprite = Player("env/angular/assets/ice-cube.png", SPRITE_SCALING)
         self.player_sprite.center_x = SCREEN_WIDTH / 2
         self.player_sprite.center_y = SCREEN_HEIGHT / 2
         self.player_list.append(self.player_sprite)
@@ -136,15 +100,3 @@ class MyGame(arcade.Window):
 
         if key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.player_sprite.change_angle = 0
-
-
-def main():
-    """ Main function """
-    window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    window.setup()
-    arcade.set_background_color(arcade.color.WHITE_SMOKE)
-    arcade.run()
-
-
-if __name__ == "__main__":
-    main()
