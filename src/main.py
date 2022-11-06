@@ -1,14 +1,12 @@
-import arcade
 from env.utils import *
+from arguments import get_args
 
-ENV = "Angular" # can either be "Grid" or "Angular"
 
-
-def main():
-    env = create_env(ENV)
-    env.setup()
-    arcade.run()
+def main(args):
+    env = create_env(args.env)
+    run_env(env)
 
 
 if __name__ == "__main__":
-    main()
+    args = get_args()
+    main(args)
