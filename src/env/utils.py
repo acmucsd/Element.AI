@@ -5,9 +5,9 @@ from .grid import constants as GRID_CONSTANTS
 from .angular import constants as ANGULAR_CONSTANTS
 
 def create_env(env):
-    if env == "Grid":
+    if env.lower() == "grid":
         return GridEnv(GRID_CONSTANTS.SCREEN_WIDTH, GRID_CONSTANTS.SCREEN_HEIGHT, GRID_CONSTANTS.SCREEN_TITLE)
-    elif env == "Angular":
+    elif env.lower() == "angular":
         return AngularEnv(ANGULAR_CONSTANTS.SCREEN_WIDTH, ANGULAR_CONSTANTS.SCREEN_HEIGHT, ANGULAR_CONSTANTS.SCREEN_TITLE)
     else:
         raise ValueError("Invalid env name")
