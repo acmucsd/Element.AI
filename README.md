@@ -14,17 +14,19 @@ pip install arcade
 
 2. Run our code
 
-
-```bash
-cd src && python main.py
-```
-
 We offer 2 simulator environments:
 
 1. `Grid` - Grid motion-based simulator
    
 2. `Angular` - Angular motion-based simulator
 
-The angular environment is shown below:
+```bash
+cd src
+python main.py --env Angular
+# or
+python main.py --env Grid
+```
+
+The Angular environment is shown below:
 
 ![angular simulator](figures/angular_sim.gif)
