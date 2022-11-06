@@ -1,29 +1,30 @@
 # Paper.IO++ Competition
 
----
-
 Designed by ACM AI at UCSD
 
 Competition to be hosted in Winter Quarter 2023
 
 ## Instructions
 
-Ensure that you have installed arcade:
+1. Ensure that you have installed `arcade`:
 
 ```bash
 pip install arcade
 ```
 
-To run our Grid Motion-based Simulator, execute this set of commands:
+2. Run our code
+
 
 ```bash
-cd src && python grid_sim.py
+cd src && python main.py
 ```
 
-To run our Angular Motion-based Simulator, execute this set of commands:
+We offer 2 simulator environments:
 
-```bash
-cd src && python angular_sim.py
-```
+1. `Grid` - Grid motion-based simulator
+   
+2. `Angular` - Angular motion-based simulator
+
+The angular environment is shown below:
 
 ![angular simulator](figures/angular_sim.gif)
