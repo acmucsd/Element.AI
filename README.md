@@ -14,17 +14,25 @@ pip install arcade
 
 2. Run our code
 
-We offer 2 simulator environments:
+We offer 3 simulator environments:
 
-1. `Grid` - Grid motion-based simulator
+1. `GridV1` - Grid motion-based simulator (no Gym API integration)
+
+2. `GridV2` - Grid motion-based simulator (w/ Gym API integration)
    
 2. `Angular` - Angular motion-based simulator
 
 ```bash
 cd src
-python main.py --env Angular
-# or
-python main.py --env Grid
+
+# to run the angular env:
+python main.py --env angular
+
+# or, to run the grid env:
+python main.py --env gridv1
+
+# or, to run the grid + gym env:
+python main.py --env gridv2
 ```
 
 The Angular environment is shown below:

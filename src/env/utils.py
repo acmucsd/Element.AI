@@ -1,27 +1,30 @@
 import arcade
-from .grid.game import GridEnv
+from .gridv1.game import GridEnvV1
+from .gridv2.game import GridEnvV2
 from .angular.game import AngularEnv
-from .grid import constants as GRID_CONSTANTS
+from .gridv1 import constants as GRID_CONSTANTS
+from .gridv2 import constants as GRIDV2_CONSTANTS
 from .angular import constants as ANGULAR_CONSTANTS
 
 def create_env(env):
-    if env.lower() == "grid":
-        return GridEnv(GRID_CONSTANTS.SCREEN_WIDTH, GRID_CONSTANTS.SCREEN_HEIGHT, GRID_CONSTANTS.SCREEN_TITLE)
+    if env.lower() == "gridv1":
+        return GridEnvV1(GRID_CONSTANTS.SCREEN_WIDTH, GRID_CONSTANTS.SCREEN_HEIGHT, GRID_CONSTANTS.SCREEN_TITLE)
+    elif env.lower() == "gridv2":
+        return GridEnvV2(render=True)
     elif env.lower() == "angular":
         return AngularEnv(ANGULAR_CONSTANTS.SCREEN_WIDTH, ANGULAR_CONSTANTS.SCREEN_HEIGHT, ANGULAR_CONSTANTS.SCREEN_TITLE)
     else:
         raise ValueError("Invalid env name")
 
+def step(env):
+    while True:
+        for i in range(10):
+            env.step(direction=1)
+        env.step(direction=-1)
+
 def run_env(env):
-    env.setup()
-    arcade.run()
-
-def grid_to_abs_pos(val):
-    x = int(val[0]) * (GRID_CONSTANTS.WIDTH + GRID_CONSTANTS.MARGIN) + (GRID_CONSTANTS.WIDTH / 2 + GRID_CONSTANTS.MARGIN)
-    y = int(val[1]) * (GRID_CONSTANTS.HEIGHT + GRID_CONSTANTS.MARGIN) + (GRID_CONSTANTS.HEIGHT / 2 + GRID_CONSTANTS.MARGIN)
-    return x, y
-
-def abs_to_grid_pos(val):
-    x = (val[0] - (GRID_CONSTANTS.WIDTH / 2 + GRID_CONSTANTS.MARGIN))// (GRID_CONSTANTS.WIDTH + GRID_CONSTANTS.MARGIN)
-    y = (val[1] - (GRID_CONSTANTS.HEIGHT / 2 + GRID_CONSTANTS.MARGIN))// (GRID_CONSTANTS.HEIGHT + GRID_CONSTANTS.MARGIN)
-    return x, y
+    if type(env) == GridEnvV2:
+        step(env)
+    else:
+        env.setup()
+        arcade.run()

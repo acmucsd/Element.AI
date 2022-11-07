@@ -5,7 +5,7 @@ from .player import Player
 import collections
 import random
 
-class GridEnv(arcade.Window):
+class GridEnvV1(arcade.Window):
     """ Main application class. """
 
     def __init__(self, width, height, title):
@@ -16,7 +16,7 @@ class GridEnv(arcade.Window):
         self.player_grid = np.full((ROW_COUNT, COLUMN_COUNT), None)
 
         # Set the window's background color
-        self.background_color = arcade.color.BLACK
+        self.background_color = arcade.color.WHITE_SMOKE
         # Create a spritelist for batch drawing all the grid sprites
         self.grid_sprite_list = arcade.SpriteList()
 
