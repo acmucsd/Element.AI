@@ -16,7 +16,7 @@ pip install arcade
 
 We offer 3 simulator environments:
 
-1. `GridV1` - Grid motion-based simulator (no Gym API integration)
+1. `GridV1` - Grid motion-based simulator (w/o Gym API integration)
 
 2. `GridV2` - Grid motion-based simulator (w/ Gym API integration)
    
