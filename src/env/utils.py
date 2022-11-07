@@ -1,16 +1,12 @@
 import arcade
 from .grid.game import GridEnv
-from .gridv2.game import GridV2Env
 from .angular.game import AngularEnv
 from .grid import constants as GRID_CONSTANTS
-from .gridv2 import constants as GRIDV2_CONSTANTS
 from .angular import constants as ANGULAR_CONSTANTS
 
 def create_env(env):
     if env.lower() == "grid":
         return GridEnv(GRID_CONSTANTS.SCREEN_WIDTH, GRID_CONSTANTS.SCREEN_HEIGHT, GRID_CONSTANTS.SCREEN_TITLE)
-    elif env.lower() == "gridv2":
-        return GridV2Env(GRIDV2_CONSTANTS.SCREEN_WIDTH, GRIDV2_CONSTANTS.SCREEN_HEIGHT, GRIDV2_CONSTANTS.SCREEN_TITLE)
     elif env.lower() == "angular":
         return AngularEnv(ANGULAR_CONSTANTS.SCREEN_WIDTH, ANGULAR_CONSTANTS.SCREEN_HEIGHT, ANGULAR_CONSTANTS.SCREEN_TITLE)
     else:
