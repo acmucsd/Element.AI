@@ -17,7 +17,8 @@
 - Compute the render frames as specified by `render_mode` attribute during initialization of the environment
 - `None` (default) = no render is computed
 - `human` = render returns `None`. The environment is continuously rendered in the current display or terminal. Usually for human consumption.
-- `rgb_array` = return a single frame representing the current state of the environment. A frame is a numpy.ndarray with shape `(h, w, 3)` representing RGB values for an h-by-w pixel image.
+- `rgb_array` = return a single frame representing the current state of the environment. 
+  - A frame is a numpy.ndarray with shape `(h, w, 3)` representing RGB values for an h-by-w pixel image.
 
 ## Attributes
 
