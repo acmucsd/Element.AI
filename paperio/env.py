@@ -7,6 +7,7 @@ import gymnasium.spaces
 from gym import spaces
 import numpy as np
 import random
+import collections
 
 from paperio.config import EnvConfig
 from paperio.player import Player
@@ -230,6 +231,47 @@ class ACMAI2022(AECEnv):
 
         self.agent_selection_num += 1
         self.agent_selection_num %= self.num_agents
+
+    # TODO: High Priority
+    # Have game run continuously and only end when hit max_iterations
+    # This includes respawn functionality
+    def reset_player(self, player):
+        indices = np.where(self.player_grid == player)
+
+        for i in range(len(indices[0])):
+            x = indices[0][i]
+            y = indices[1][i]
+            self.grid[x][y] = UNOCCUPIED
+            self.player_grid[x][y] = None
+
+        player.reset_player()
+
+    def update_occupancy(self, player):
+
+        map_size = self.env_cfg.map_size
+
+        queue = collections.deque([])
+        for r in range(map_size):
+            for c in range(map_size):
+                if (r in [0, map_size-1] or c in [0, map_size-1]) and self.grid[r][c] == UNOCCUPIED:
+                    queue.append((r, c))
+        while queue:
+            r, c = queue.popleft()
+            if 0<=r<map_size and 0<=c<map_size and self.grid[r][c] == UNOCCUPIED:
+                self.grid[r][c] = TEMP
+                queue.extend([(r-1, c),(r+1, c),(r, c-1),(r, c+1)])
+
+        for r in range(map_size):
+            for c in range(map_size):
+                cell = self.grid[r][c]
+                occupied_by = self.player_grid[r][c]
+                if (occupied_by == player and cell == PASSED) or cell == UNOCCUPIED:
+                    self.grid[r][c] = OCCUPIED
+                    self.player_grid[r][c] = player
+                    player.push_zone((c,r))
+                elif cell == -1:
+                    self.grid[r][c] = UNOCCUPIED
+                    self.player_grid[r][c] = None
 
     def reset(self, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None) -> None:
         self.setup()
