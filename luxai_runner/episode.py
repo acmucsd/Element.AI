@@ -56,13 +56,13 @@ class Episode:
             raise ValueError(f"{self.cfg.replay_options.save_format} is not a valid save format")
 
     async def run(self):
-        if len(self.players) != 2: 
-            raise ValueError("Must provide two paths.")
+        # if len(self.players) != 2: 
+        #     raise ValueError("Must provide two paths.")
         # Start agents
         players: Dict[str, Bot] = dict()
         start_tasks = []
         save_replay = self.cfg.save_replay_path is not None
-        for i in range(2):
+        for i in range(len(self.cfg.players)):
             player = Bot(self.players[i], f"player_{i}", i, verbose=self.log.verbosity)
             player.proc.log.identifier = player.log.identifier
             players[player.agent] = player
@@ -72,7 +72,7 @@ class Episode:
         
         obs = self.env.reset(seed=self.seed)
         env_cfg = self.env.state.env_cfg
-        state_obs = self.env.state.get_compressed_obs()
+        state_obs = obs #self.env.state.get_compressed_obs()
         obs = to_json(state_obs)
 
         if self.cfg.render: 
@@ -90,10 +90,11 @@ class Episode:
 
         if save_replay:
             replay = dict(observations=[], actions=[], dones=[], rewards=[])
-            if self.cfg.replay_options.compressed_obs:
-                replay["observations"].append(state_obs)
-            else:
-                replay["observations"].append(self.env.state.get_obs())
+            replay["observations"].append(state_obs)
+            # if self.cfg.replay_options.compressed_obs:
+            #     replay["observations"].append(state_obs)
+            # else:
+            #     replay["observations"].append(self.env.state.get_obs())
 
         i = 0
         while not game_done:

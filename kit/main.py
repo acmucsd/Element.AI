@@ -28,10 +28,8 @@ def agent_fn(observation, configurations):
     obs = process_obs(player, agent_prev_obs[player], step, json.loads(observation.obs))
     agent_prev_obs[player] = obs
     agent.step = step
-    if obs["real_env_steps"] < 0:
-        actions = agent.early_setup(step, obs, remainingOverageTime)
-    else:
-        actions = agent.act(step, obs, remainingOverageTime)
+
+    actions = agent.act(step, obs, remainingOverageTime)
 
     return process_action(actions)
 
@@ -57,6 +55,6 @@ if __name__ == "__main__":
         if i == 0:
             configurations = obs["info"]["env_cfg"]
         i += 1
-        actions = agent_fn(observation, dict(env_cfg=configurations))
+        action = agent_fn(observation, dict(env_cfg=configurations))
         # send actions to engine
-        print(json.dumps(actions))
+        print(json.dumps(action))

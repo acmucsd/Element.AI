@@ -1,6 +1,6 @@
 from pettingzoo import ParallelEnv
+from pettingzoo.utils import wrappers
 
-import warnings
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, TypeVar
 
 import gymnasium.spaces
@@ -19,6 +19,22 @@ AgentID = str
 
 ObsDict = Dict[AgentID, ObsType]
 ActionDict = Dict[AgentID, ActionType]
+
+def env():
+    """
+    The env function often wraps the environment in wrappers by default.
+    You can find full documentation for these methods
+    elsewhere in the developer documentation.
+    """
+    env = raw_env()
+    # This wrapper is only for environments which print results to the terminal
+    env = wrappers.CaptureStdoutWrapper(env)
+    # this wrapper helps error handling for discrete action spaces
+    env = wrappers.AssertOutOfBoundsWrapper(env)
+    # Provides a wide vareity of helpful user errors
+    # Strongly recommended
+    env = wrappers.OrderEnforcingWrapper(env)
+    return env
 
 class PaperIO(ParallelEnv):
     metadata = {"render.modes": ["human", "rgb_array"], "name": "ACM_AI_SP22_PaperIO.v0"}
@@ -41,7 +57,7 @@ class PaperIO(ParallelEnv):
 
     def setup(self):
 
-        self.iteration = 0
+        self.env_steps = 0
 
         # TODO smarter spawning
         map_size = self.env_cfg.map_size
@@ -212,8 +228,8 @@ class PaperIO(ParallelEnv):
                     else:
                         raise Exception("Unknown grid value")
         
-        self.iteration += 1
-        env_done = self.iteration == self.env_cfg.max_episode_length
+        self.env_steps += 1
+        env_done = self.env_steps == self.env_cfg.max_episode_length
 
         observations = dict()
         rewards = dict()
@@ -403,3 +419,12 @@ class PaperIO(ParallelEnv):
     @property
     def unwrapped(self) -> ParallelEnv:
         return self
+
+def raw_env() -> PaperIO:
+    """
+    To support the AEC API, the raw_env() function just uses the from_parallel
+    function to convert from a ParallelEnv to an AEC env
+    """
+    env = PaperIO()
+    # env = parallel_to_aec(env)
+    return env
