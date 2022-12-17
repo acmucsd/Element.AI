@@ -1,15 +1,13 @@
 import json
 from typing import Dict
-import sys
 from argparse import Namespace
 
 from agent import Agent
-from lux.config import EnvConfig
-from lux.kit import GameState, process_obs, to_json, from_json, process_action, obs_to_game_state
+from kit.kit import process_obs, to_json, from_json, process_action
 ### DO NOT REMOVE THE FOLLOWING CODE ###
 agent_dict = dict() # store potentially multiple dictionaries as kaggle imports code directly
 agent_prev_obs = dict()
-def agent_fn(observation, configurations):
+def agent_fn(observation):
     """
     agent definition for kaggle submission.
     """
@@ -20,8 +18,7 @@ def agent_fn(observation, configurations):
     player = observation.player
     remainingOverageTime = observation.remainingOverageTime
     if step == 0:
-        env_cfg = EnvConfig.from_dict(configurations["env_cfg"])
-        agent_dict[player] = Agent(player, env_cfg)
+        agent_dict[player] = Agent(player)
         agent_prev_obs[player] = dict()
         agent = agent_dict[player]
     agent = agent_dict[player]
@@ -52,9 +49,7 @@ if __name__ == "__main__":
         obs = json.loads(inputs)
         
         observation = Namespace(**dict(step=obs["step"], obs=json.dumps(obs["obs"]), remainingOverageTime=obs["remainingOverageTime"], player=obs["player"], info=obs["info"]))
-        if i == 0:
-            configurations = obs["info"]["env_cfg"]
         i += 1
-        action = agent_fn(observation, dict(env_cfg=configurations))
+        actions = agent_fn(observation)
         # send actions to engine
-        print(json.dumps(action))
+        print(json.dumps(actions))

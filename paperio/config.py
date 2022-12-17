@@ -8,7 +8,7 @@ class EnvConfig:
     Max Vals
     """
     max_players: int = 4
-    max_episode_length: int = 1000
+    max_episode_length: int = 300
 
     """
     Set During Configuration

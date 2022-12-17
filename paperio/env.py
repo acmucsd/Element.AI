@@ -146,7 +146,6 @@ class PaperIO(ParallelEnv):
     def action_space(self, agent: str) -> gymnasium.spaces.Space:
         
         act_space = spaces.Dict(
-            allowed=spaces.Box(low=0, high=1, dtype=bool),             # NOTE: this will be used by speed algo
             turn=spaces.Discrete(3, start=-1),
         )
 
@@ -156,7 +155,7 @@ class PaperIO(ParallelEnv):
     Env Runtime Functions
     """
 
-    def step(self, actions: ActionDict, initialRound=True):
+    def step(self, actions: ActionDict, allow_list: dict(), initialRound=True):
         """Receives a dictionary of actions keyed by the agent name.
 
         Returns the observation dictionary, reward dictionary, terminated dictionary, truncated dictionary
@@ -164,10 +163,11 @@ class PaperIO(ParallelEnv):
         """
         players_moving = []
 
+        i = 0
         for agent in actions.keys():
             action = actions[agent]
 
-            if (action['allowed']):
+            if ():
                 turn = action['turn']
                 player: Player = self.player_dict[agent] 
 

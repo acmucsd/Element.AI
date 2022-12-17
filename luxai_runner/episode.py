@@ -122,15 +122,18 @@ class Episode:
                         else:
                             print(f"{agent_id} sent a invalid action {action}")
                     actions[agent_id] = None
+
             new_state_obs, rewards, dones, infos = self.env.step(actions)
-            change_obs = self.env.state.get_change_obs(state_obs)
-            state_obs = new_state_obs["player_0"]
-            obs = to_json(change_obs)
+            # change_obs = self.env.state.get_change_obs(state_obs)
+            # state_obs = new_state_obs["player_0"]
+            # obs = to_json(change_obs)
+            obs = to_json(new_state_obs)
             if save_replay:
-                if self.cfg.replay_options.compressed_obs:
-                    replay["observations"].append(change_obs)
-                else:
-                    replay["observations"].append(self.env.state.get_obs())
+                replay["observations"].append(obs)
+                # if self.cfg.replay_options.compressed_obs:
+                #     replay["observations"].append(obs)
+                # else:
+                #     replay["observations"].append(self.env.state.get_obs())
                 replay["actions"].append(actions)
                 replay["rewards"].append(rewards)
                 replay["dones"].append(dones)
