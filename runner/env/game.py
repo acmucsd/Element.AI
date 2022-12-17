@@ -3,52 +3,45 @@ import random
 import collections
 from .player import Player
 from .constants import *
+from .utils import *
 
 import json
 from json import JSONEncoder
 
-# class NumpyArrayEncoder:
-#     def __init__(self):
-#         self.init = True
-#     def default(self, obj):
-#         if isinstance(obj, np.ndarray):
-#             return obj.tolist()
-#         return JSONEncoder.default(self, obj)
-#     def decode(self, encoded_numpy_data, key):
-#         decoded = json.loads(encoded_numpy_data)
-#         numpy_array = np.asarray(decoded[key])
-#         return numpy_array
-#     def encode(self, arr):
-#         numpy_data = {"array": arr}
-#         encoded_numpy_data = json.dumps(numpy_data, cls=self)
-#         return encoded_numpy_data["array"]
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
-class NumpyArrayEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return JSONEncoder.default(self, obj)
+@dataclass
+class EnvConfig:
+    players: List[str]
+    rows: int
+    cols: int
+    max_iterations: int
 
 class GridEnvV2:
-    def __init__(self, num_players = 1):
-        self.grid = np.zeros((ROW_COUNT, COLUMN_COUNT))
-        self.player_grid = np.full((ROW_COUNT, COLUMN_COUNT), None)
-        self.player_list = []
-        self.num_players = num_players
+    def __init__(self, cfg: EnvConfig):
 
+        self.cfg = cfg
+        self.iteration = 0
+        self.num_players = len(self.cfg.players)
+        self.grid = np.zeros((cfg.rows, cfg.cols))
+        self.player_grid = np.full((cfg.rows, cfg.cols), None)
+        self.player_dict = {}
+
+        # TODO smarter spawning
         self.starting_coords = [
-            (int(ROW_COUNT/4), int(COLUMN_COUNT/4)),
-            (int(ROW_COUNT/4), int(COLUMN_COUNT/4)*3),
-            (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)*3),
-            (int(ROW_COUNT/4)*3, int(COLUMN_COUNT/4)),
+            (int(cfg.rows/4), int(cfg.cols/4)),
+            (int(cfg.rows/4), int(cfg.cols/4)*3),
+            (int(cfg.rows/4)*3, int(cfg.cols/4)*3),
+            (int(cfg.rows/4)*3, int(cfg.cols/4)),
         ]
         self.setup()
 
     def setup(self):
         for player_num in range(self.num_players):
             start_x, start_y = self.starting_coords[player_num]
-            self.player_list.append(Player(start_x, start_y, player_num))
-            player = self.player_list[player_num]
+            player = Player(start_x, start_y, player_num)
+            self.player_dict[self.cfg.players[player_num]] = player
             c, r = player.pos
             for cc in range(c-1, c + 2):
                 for rr in range(r-1, r + 2):
@@ -56,10 +49,36 @@ class GridEnvV2:
                     self.player_grid[rr][cc] = player
                     player.push_zone((rr, cc))
         self.place_boost_bomb()
+        self.start_game(self.player_dict[self.cfg.players[0]])
+
+    def start_game(self, player):
+        self.print_game_data(player, False)
+
+    def print_game_data(self, player, resetting):
+        game_data = {
+            "player_info": {
+                "player_num": player.num,
+                "direction": DIRECTIONS[player.direction],
+                "head": player.pos,
+                "tail": player.path,
+                "zone": player.zone,
+                "resetting": resetting,
+            },
+            "game_info": {
+                "game_iteration" : self.iteration,
+                # "board_state": self.grid,
+                # "players_state": self.player_grid,
+                # TODO need to convert code so that self.player_grid contains the player_nums, not the player objects
+            }
+        }
+
+        encoded_game_data = json.dumps(to_json(game_data))
+
+        print(encoded_game_data)
 
     # direction should be -1 or 1
-    def step(self, player_num, direction, iteration):
-        player = self.player_list[player_num]
+    def step(self, player_id, direction):
+        player = self.player_dict[player_id]
 
         player.update(direction)
 
@@ -71,7 +90,7 @@ class GridEnvV2:
             c, r = player.pos
             player_cell = self.grid[r][c]
             if player_cell == PASSED:
-                reset_targets = [p for p in self.player_list if p.pos == player.pos]
+                reset_targets = [p for p in self.player_dict.values() if p.pos == player.pos]
                 if len(reset_targets) > 1:
                     for target in reset_targets:
                         self.reset_player(target)
@@ -106,39 +125,24 @@ class GridEnvV2:
                 raise Exception("Unknown grid value")
 
 
-        game_data = {
-            "num": player.num,
-            "pos": player.pos,
-            "direction": direction,
-            "resetting": resetting,
-            "iteration" : iteration,
-            "board_state": self.grid,
-            # "players_state": self.player_grid,
-            # TODO need to convert code so that self.player_grid contains the player_nums, not the player objects
-        }
-
-        encoded_game_data = json.dumps(game_data, cls=NumpyArrayEncoder)
-
-        print(encoded_game_data)
+        self.print_game_data(player, resetting)
 
     def reset(self):
         print("Game Results:")
-        for player in self.player_list:
+        for player in self.player_dict.values():
             print(f"Player {player} earned {player.score} points!")
         print("\n")
 
         self.grid *= 0
-        self.player_grid = np.full((ROW_COUNT, COLUMN_COUNT), None)
-        self.player_list = []
-        self.setup()
+        self.player_grid = np.full((self.cfg.rows, COLUMN_COUNT), None)
+        self.player_dict = {}
 
-    def render(self):
-        self.renderWindow.render(self.grid, self.player_grid, self.player_list)
+        # self.setup()
 
     def place_boost_bomb(self, boost_count = BOOST_COUNT, bomb_count=BOMB_COUNT):
         # place boosts
         while (boost_count>0):
-            x = random.randrange(0, ROW_COUNT)
+            x = random.randrange(0, self.cfg.rows)
             y = random.randrange(0, COLUMN_COUNT)
             if(self.grid[x][y]==0):
                 self.grid[x][y]= BOOST
@@ -146,7 +150,7 @@ class GridEnvV2:
 
         # place bombs
         while (bomb_count>0):
-            x = random.randrange(0, ROW_COUNT)
+            x = random.randrange(0, self.cfg.rows)
             y = random.randrange(0, COLUMN_COUNT)
             if(self.grid[x][y]==0):
                 self.grid[x][y]= BOMB
@@ -165,17 +169,17 @@ class GridEnvV2:
 
     def update_occupancy(self, player):
         queue = collections.deque([])
-        for r in range(ROW_COUNT):
+        for r in range(self.cfg.rows):
             for c in range(COLUMN_COUNT):
-                if (r in [0, ROW_COUNT-1] or c in [0, COLUMN_COUNT-1]) and self.grid[r][c] == UNOCCUPIED:
+                if (r in [0, self.cfg.rows-1] or c in [0, COLUMN_COUNT-1]) and self.grid[r][c] == UNOCCUPIED:
                     queue.append((r, c))
         while queue:
             r, c = queue.popleft()
-            if 0<=r<ROW_COUNT and 0<=c<COLUMN_COUNT and self.grid[r][c] == UNOCCUPIED:
+            if 0<=r<self.cfg.rows and 0<=c<COLUMN_COUNT and self.grid[r][c] == UNOCCUPIED:
                 self.grid[r][c] = TEMP
                 queue.extend([(r-1, c),(r+1, c),(r, c-1),(r, c+1)])
 
-        for r in range(ROW_COUNT):
+        for r in range(self.cfg.rows):
             for c in range(COLUMN_COUNT):
                 cell = self.grid[r][c]
                 occupied_by = self.player_grid[r][c]

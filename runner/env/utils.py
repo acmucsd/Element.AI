@@ -19,7 +19,7 @@ def to_json(obj):
         return int(obj)
     elif isinstance(obj, np.floating):
         return float(obj)
-    elif isinstance(obj, list) or isinstance(obj, tuple):
+    elif isinstance(obj, list) or isinstance(obj, tuple) or isinstance(obj, set):
         return [to_json(s) for s in obj]
     elif isinstance(obj, dict):
         out = {}
