@@ -4,6 +4,7 @@ import warnings
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, TypeVar
 
 import gymnasium.spaces
+from gym import spaces
 import numpy as np
 import random
 
@@ -133,17 +134,56 @@ class ACMAI2022(AECEnv):
         """
         raise NotImplementedError
 
+    # TODO: add to game_data to add useful info
+    def get_game_data(self, player_id):
+        player = self.player_dict[player_id]
+        game_data = {
+            "player_info": {
+                "player_num": player.num,
+                "direction": DIRECTIONS[player.direction],
+                "head": player.pos,
+                "tail": player.path,
+                "zone": player.zone,
+                "resetting": player.reset,
+            },
+            "game_info": {
+                "iteration" : self.iteration,
+                # "board_state": self.grid,                 # working, commented out to shorten prints
+                # "players_state": self.player_grid,        # not working, see the below
+
+                # TODO: High Priority
+                # need to convert code so that self.player_grid contains the player_nums, not the player objects
+            }
+        }
+
+        encoded_game_data = json.dumps(to_json(game_data))
+
+        return encoded_game_data
+
     def observation_space(self, agent: AgentID) -> gymnasium.spaces.Space:
-        """Takes in agent and returns the observation space for that agent.
+        
+        obs_space = dict()
 
-        MUST return the same value for the same agent name
-
-        Default implementation is to return the observation_spaces dict
-        """
-        warnings.warn(
-            "Your environment should override the observation_space function. Attempting to use the observation_spaces dict attribute."
+        obs_space[agent] = spaces.Dict(
+            player_num=spaces.Discrete(self.num_agents),
+            direction=spaces.Box(low=-1, high=1, shape=(2,), dtype=int),
+            pos=spaces.Box(low=0, high=self.env_cfg.map_size, dtype=int),
+            resetting=spaces.Box(low=0, high=1, dtype=bool)
+            # TODO: High Priority
+            # figure out implementation of the below items
+            # "tail": player.path,
+            # "zone": player.zone,
         )
-        return self.observation_spaces[agent]
+
+        obs_space["board"] = spaces.Dict(
+            iteration=spaces.Discrete(self.env_cfg.max_episode_length),
+            board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
+            # TODO: High Priority
+            # need to convert code so that self.player_grid contains the player_nums, not the player objects
+            # "players_state": self.player_grid,        # not working, see the below
+        )
+
+        return spaces.Dict(obs_space)
 
     def action_space(self, agent: str) -> gymnasium.spaces.Space:
         """Takes in agent and returns the action space for that agent.
@@ -152,6 +192,7 @@ class ACMAI2022(AECEnv):
 
         Default implementation is to return the action_spaces dict
         """
+        # Discrete(3, start=-1)  # {-1, 0, 1}
         warnings.warn(
             "Your environment should override the action_space function. Attempting to use the action_spaces dict attribute."
         )
