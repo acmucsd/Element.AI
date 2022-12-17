@@ -134,32 +134,6 @@ class ACMAI2022(AECEnv):
         """
         raise NotImplementedError
 
-    # TODO: add to game_data to add useful info
-    def get_game_data(self, player_id):
-        player = self.player_dict[player_id]
-        game_data = {
-            "player_info": {
-                "player_num": player.num,
-                "direction": DIRECTIONS[player.direction],
-                "head": player.pos,
-                "tail": player.path,
-                "zone": player.zone,
-                "resetting": player.reset,
-            },
-            "game_info": {
-                "iteration" : self.iteration,
-                # "board_state": self.grid,                 # working, commented out to shorten prints
-                # "players_state": self.player_grid,        # not working, see the below
-
-                # TODO: High Priority
-                # need to convert code so that self.player_grid contains the player_nums, not the player objects
-            }
-        }
-
-        encoded_game_data = json.dumps(to_json(game_data))
-
-        return encoded_game_data
-
     def observation_space(self, agent: AgentID) -> gymnasium.spaces.Space:
         
         obs_space = dict()
@@ -186,17 +160,12 @@ class ACMAI2022(AECEnv):
         return spaces.Dict(obs_space)
 
     def action_space(self, agent: str) -> gymnasium.spaces.Space:
-        """Takes in agent and returns the action space for that agent.
-
-        MUST return the same value for the same agent name
-
-        Default implementation is to return the action_spaces dict
-        """
-        # Discrete(3, start=-1)  # {-1, 0, 1}
-        warnings.warn(
-            "Your environment should override the action_space function. Attempting to use the action_spaces dict attribute."
+        
+        act_space = spaces.Dict(
+            turn=spaces.Discrete(3, start=-1)
         )
-        return self.action_spaces[agent]
+
+        return act_space
 
     def last(
         self, observe: bool = True
