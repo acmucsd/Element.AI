@@ -32,12 +32,6 @@ class ACMAI2022(AECEnv):
     possible_agents: List[AgentID]
     agents: List[AgentID]  # Agents active at any given time
 
-    observation_spaces: Dict[
-        AgentID, gymnasium.spaces.Space
-    ]  # Observation space for each agent
-    # Action space for each agent
-    action_spaces: Dict[AgentID, gymnasium.spaces.Space]
-
     # Whether each agent has just reached a terminal state
     terminations: Dict[AgentID, bool]
     truncations: Dict[AgentID, bool]
@@ -50,6 +44,8 @@ class ACMAI2022(AECEnv):
 
     agent_selection: AgentID  # The agent currently being stepped
 
+
+
     """
     Init Functions
     """
@@ -59,10 +55,12 @@ class ACMAI2022(AECEnv):
         self.env_cfg = env_cfg
 
         self.possible_agents = ["player_" + str(r) for r in range(self.env_cfg.max_players)]
-        self.agents = self.possible_agents
-        self.max_episode_length = self.env_cfg.max_episode_length
 
+        self.agents = self.possible_agents
+
+        self.max_episode_length = self.env_cfg.max_episode_length
         self.iteration = 0
+        self.agent_selection = self.agents[0]
 
         self.setup()
 
@@ -185,9 +183,7 @@ class ACMAI2022(AECEnv):
 
         return act_space
 
-    def last(
-        self, observe: bool = True
-    ) -> Tuple[Optional[ObsType], float, bool, bool, Dict[str, Any]]:
+    def last(self, observe: bool = True):
         """Returns observation, cumulative reward, terminated, truncated, info for the current agent (specified by self.agent_selection)."""
         agent = self.agent_selection
         assert agent
