@@ -1,13 +1,15 @@
 import asyncio
 from typing import Dict, List
-from luxai_runner.bot import Bot
-from paperio import PaperIO
 import numpy as np
 import json
+# from omegaconf import OmegaConf
+
+from luxai_runner.bot import Bot
 from luxai_runner.episode import Episode, EpisodeConfig, ReplayConfig
 # from luxai_runner.tournament import Tournament
 from luxai_runner.logger import Logger
-# from omegaconf import OmegaConf
+
+from paperio import PaperIO
 
 def main():
     np.random.seed(0)
@@ -15,7 +17,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Run the LuxAI 2022 game.")
     parser.add_argument("players", nargs="+", help="Paths to player modules. If --tournament is passed as well, you can also pass a folder and we will look through all sub-folders for valid agents with main.py files (only works for python agents at the moment).")
-    parser.add_argument("-l", "--len", help="Max episode length", type=int, default=1000)
+    parser.add_argument("-l", "--len", help="Max episode length", type=int, default=300)
 
     # # replay configs
     # parser.add_argument("-o", "--output", help="Where to output replays. Default is none and no replay is generated")
@@ -58,6 +60,7 @@ def main():
             # ),
             # render=args.render
         )
+
 
     import time
     stime = time.time()

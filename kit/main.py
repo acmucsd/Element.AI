@@ -3,7 +3,7 @@ from typing import Dict
 from argparse import Namespace
 
 from agent import Agent
-from kit.kit import process_obs, to_json, from_json, process_action
+from tools.tools import process_obs, to_json, from_json, process_action
 ### DO NOT REMOVE THE FOLLOWING CODE ###
 agent_dict = dict() # store potentially multiple dictionaries as kaggle imports code directly
 agent_prev_obs = dict()

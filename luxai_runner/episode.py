@@ -19,7 +19,7 @@ class ReplayConfig:
 @dataclass
 class EpisodeConfig:
     players: List[str]
-    num_players = 1
+    num_players: int
     env_cls: Callable[[Any], gym.Env]
     seed: Optional[int] = None
     env_cfg: Optional[Any] = dict
@@ -56,6 +56,7 @@ class Episode:
             raise ValueError(f"{self.cfg.replay_options.save_format} is not a valid save format")
 
     async def run(self):
+
         # if len(self.players) != 2: 
         #     raise ValueError("Must provide two paths.")
         # Start agents
@@ -71,7 +72,7 @@ class Episode:
 
         
         obs = self.env.reset(seed=self.seed)
-        env_cfg = self.env.state.env_cfg
+        env_cfg = self.env.env_cfg
         state_obs = obs #self.env.state.get_compressed_obs()
         obs = to_json(state_obs)
 
@@ -87,6 +88,8 @@ class Episode:
                 # turn 0 provide configurations
                 env_cfg=dataclasses.asdict(env_cfg)
             )
+        
+        print(obs)
 
         if save_replay:
             replay = dict(observations=[], actions=[], dones=[], rewards=[])
@@ -97,7 +100,7 @@ class Episode:
             #     replay["observations"].append(self.env.state.get_obs())
 
         i = 0
-        while not game_done:
+        while (i < 1):#not game_done:
             i += 1
             # print("===", self.env.env_steps)
             actions = dict()
@@ -128,6 +131,9 @@ class Episode:
             # state_obs = new_state_obs["player_0"]
             # obs = to_json(change_obs)
             obs = to_json(new_state_obs)
+
+            print(obs)
+
             if save_replay:
                 replay["observations"].append(obs)
                 # if self.cfg.replay_options.compressed_obs:

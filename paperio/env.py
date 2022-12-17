@@ -9,9 +9,9 @@ import numpy as np
 import random
 import collections
 
-from paperio.config import EnvConfig
-from paperio.player import Player
-from paperio.constants import *
+from .config import EnvConfig
+from .player import Player
+from .constants import *
 
 ObsType = TypeVar("ObsType")
 ActionType = TypeVar("ActionType")
@@ -50,7 +50,7 @@ class PaperIO(ParallelEnv):
 
         self.possible_agents = ["player_" + str(r) for r in range(self.env_cfg.max_players)]
 
-        self.agents = self.possible_agents
+        self.agents = self.possible_agents[:self.env_cfg.num_players]
         self.max_episode_length = self.env_cfg.max_episode_length
 
         self.setup()
@@ -155,7 +155,7 @@ class PaperIO(ParallelEnv):
     Env Runtime Functions
     """
 
-    def step(self, actions: ActionDict, allow_list: dict(), initialRound=True):
+    def step(self, actions: ActionDict, initialRound=True):
         """Receives a dictionary of actions keyed by the agent name.
 
         Returns the observation dictionary, reward dictionary, terminated dictionary, truncated dictionary
@@ -163,11 +163,10 @@ class PaperIO(ParallelEnv):
         """
         players_moving = []
 
-        i = 0
         for agent in actions.keys():
             action = actions[agent]
 
-            if ():
+            if (True):
                 turn = action['turn']
                 player: Player = self.player_dict[agent] 
 
@@ -188,7 +187,7 @@ class PaperIO(ParallelEnv):
                 continue
             else:
                 c, r = player.pos
-                if c < 0 or c>= self.map_size or r < 0 or r>=self.map_size:
+                if c < 0 or c>= self.env_cfg.map_size or r < 0 or r>=self.env_cfg.map_size:
                     self.reset_player(player)
                 else:
                     player_cell = self.grid[r][c]
@@ -256,13 +255,13 @@ class PaperIO(ParallelEnv):
             dones[agent] = env_done
             infos[agent] = None
 
-        observations['board'] = spaces.Dict(
-            iteration=spaces.Discrete(self.env_cfg.max_episode_length),
-            board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
+        observations['board'] = {
+            'iteration': self.env_steps,
+            # 'board_state': self.grid,
             # TODO: High Priority
             # need to convert code so that self.player_grid contains the player_nums, not the player objects
             # "players_state": self.player_grid,
-        )
+        }
 
         return observations, rewards, dones, infos
         
@@ -342,13 +341,13 @@ class PaperIO(ParallelEnv):
             dones[agent] = False
             infos[agent] = None
 
-        observations['board'] = spaces.Dict(
-            iteration=spaces.Discrete(self.env_cfg.max_episode_length),
-            board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
+        observations['board'] = {
+            'iteration': self.env_steps,
+            # 'board_state': self.grid,
             # TODO: High Priority
             # need to convert code so that self.player_grid contains the player_nums, not the player objects
             # "players_state": self.player_grid,
-        )
+        }
 
         return observations
     
