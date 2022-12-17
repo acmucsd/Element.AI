@@ -62,6 +62,8 @@ class ACMAI2022(AECEnv):
         self.agents = self.possible_agents
         self.max_episode_length = self.env_cfg.max_episode_length
 
+        self.iteration = 0
+
         self.setup()
 
         pass
@@ -126,13 +128,29 @@ class ACMAI2022(AECEnv):
     """
     Space Functions
     """
-    # TODO: Remove `Optional` type below
-    def observe(self, agent: str) -> Optional[ObsType]:
-        """Returns the observation an agent currently can make.
+    def observe(self, agent: str):
+        player = self.player_dict[agent]
 
-        `last()` calls this function.
-        """
-        raise NotImplementedError
+        game_data = {
+            agent: {
+                "player_num": player.num,
+                "direction": DIRECTIONS[player.direction],
+                "resetting": player.reset,
+                "head": player.pos,
+                # NOTE: see observation_space function
+                # "tail": player.path,
+                # "zone": player.zone,
+            },
+            "board": {
+                "iteration" : self.iteration,
+                "board_state": self.grid,
+                # NOTE: see observation_space function
+                # "players_state": self.player_grid,
+            }
+        }
+
+        return game_data
+
 
     def observation_space(self, agent: AgentID) -> gymnasium.spaces.Space:
         
@@ -141,8 +159,8 @@ class ACMAI2022(AECEnv):
         obs_space[agent] = spaces.Dict(
             player_num=spaces.Discrete(self.num_agents),
             direction=spaces.Box(low=-1, high=1, shape=(2,), dtype=int),
-            pos=spaces.Box(low=0, high=self.env_cfg.map_size, dtype=int),
-            resetting=spaces.Box(low=0, high=1, dtype=bool)
+            resetting=spaces.Box(low=0, high=1, dtype=bool),
+            head=spaces.Box(low=0, high=self.env_cfg.map_size, dtype=int),
             # TODO: High Priority
             # figure out implementation of the below items
             # "tail": player.path,
@@ -154,7 +172,7 @@ class ACMAI2022(AECEnv):
             board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
             # TODO: High Priority
             # need to convert code so that self.player_grid contains the player_nums, not the player objects
-            # "players_state": self.player_grid,        # not working, see the below
+            # "players_state": self.player_grid,
         )
 
         return spaces.Dict(obs_space)
@@ -176,10 +194,10 @@ class ACMAI2022(AECEnv):
         observation = self.observe(agent) if observe else None
         return (
             observation,
-            self._cumulative_rewards[agent],
-            self.terminations[agent],
-            self.truncations[agent],
-            self.infos[agent],
+            # self._cumulative_rewards[agent],
+            # self.terminations[agent],
+            # self.truncations[agent],
+            # self.infos[agent],
         )
 
 
