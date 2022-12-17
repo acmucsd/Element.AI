@@ -140,11 +140,7 @@ class PaperIO(ParallelEnv):
     Env Runtime Functions
     """
 
-    def step(
-        self, actions: ActionDict, initialRound=True
-    ) -> Tuple[
-        ObsDict, Dict[str, float], Dict[str, bool], Dict[str, bool], Dict[str, dict]
-    ]:
+    def step(self, actions: ActionDict, initialRound=True):
         """Receives a dictionary of actions keyed by the agent name.
 
         Returns the observation dictionary, reward dictionary, terminated dictionary, truncated dictionary
@@ -161,8 +157,6 @@ class PaperIO(ParallelEnv):
 
                 player.update(turn)
                 players_moving.append(player)
-
-        observations = dict()
 
         # TODO: Low priority
         # Note that much of the code below is checking edge cases that only arose in GridEnvV1
@@ -218,6 +212,14 @@ class PaperIO(ParallelEnv):
                     else:
                         raise Exception("Unknown grid value")
         
+        self.iteration += 1
+        env_done = self.iteration == self.env_cfg.max_episode_length
+
+        observations = dict()
+        rewards = dict()
+        dones = dict()
+        infos = dict()
+
         for agent in self.agents:
             player:Player = self.player_dict[agent]
 
@@ -231,6 +233,13 @@ class PaperIO(ParallelEnv):
                 # "zone": player.zone,
             }
 
+            # TODO: High priority
+            # Implement rewards and infos discts
+            # NOTE: dones is false until hit max_episode_length
+            rewards[agent] = len(player.zone)
+            dones[agent] = env_done
+            infos[agent] = None
+
         observations['board'] = spaces.Dict(
             iteration=spaces.Discrete(self.env_cfg.max_episode_length),
             board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
@@ -239,9 +248,7 @@ class PaperIO(ParallelEnv):
             # "players_state": self.player_grid,
         )
 
-        # TODO: High priority
-        # Implement reward dictionary, terminated dictionary, truncated dictionary, and info dictionary
-        return observations, dict(), dict(), dict(), dict()
+        return observations, rewards, dones, infos
         
 
     # TODO: High Priority
@@ -293,8 +300,41 @@ class PaperIO(ParallelEnv):
         options: Optional[dict] = None,
     ) -> ObsDict:
         self.setup()
-        return None
 
+        observations = dict()
+        rewards = dict()
+        dones = dict()
+        infos = dict()
+
+        for agent in self.agents:
+            player:Player = self.player_dict[agent]
+
+            observations[agent] = {
+                'player_num': player.num,
+                'direction': DIRECTIONS[player.direction],
+                'resetting': player.reset,
+                'head': player.pos,
+                # NOTE: see observation_space function
+                # "tail": player.path,
+                # "zone": player.zone,
+            }
+
+            # TODO: High priority
+            # Implement rewards and infos discts
+            # NOTE: dones is false until hit max_episode_length
+            rewards[agent] = len(player.zone)
+            dones[agent] = False
+            infos[agent] = None
+
+        observations['board'] = spaces.Dict(
+            iteration=spaces.Discrete(self.env_cfg.max_episode_length),
+            board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
+            # TODO: High Priority
+            # need to convert code so that self.player_grid contains the player_nums, not the player objects
+            # "players_state": self.player_grid,
+        )
+
+        return observations
     
 
     # NOTE: seed will be useful only when we implement seed-based bomb/boost placement

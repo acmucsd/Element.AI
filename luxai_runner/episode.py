@@ -19,11 +19,12 @@ class ReplayConfig:
 @dataclass
 class EpisodeConfig:
     players: List[str]
+    num_players = 1
     env_cls: Callable[[Any], gym.Env]
     seed: Optional[int] = None
     env_cfg: Optional[Any] = dict
     verbosity: Optional[int] = 1
-    render: Optional[bool] = True
+    render: Optional[bool] = False
     save_replay_path: Optional[str] = None
     replay_options: ReplayConfig = ReplayConfig()
 
@@ -139,7 +140,7 @@ class Episode:
             players_left = len(dones)
             for k in dones:
                 if dones[k]: players_left -= 1
-            if players_left < 2: # specific to lux ai 2022
+            if players_left < len(self.cfg.players):
                 game_done = True
         self.log.info(f"Final Scores: {rewards}")
         if save_replay:

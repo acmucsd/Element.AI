@@ -1,11 +1,11 @@
 from turtle import color
 
-from luxai2022.globals import TERM_COLORS
-try:
-    from termcolor import colored
-except:
-    pass
-import os
+# from luxai2022.globals import TERM_COLORS
+# try:
+#     from termcolor import colored
+# except:
+#     pass
+# import os
 class Logger:
     """
     A basic logger
@@ -22,10 +22,11 @@ class Logger:
     def _print(self, msg: str, color: str, end: str = "\n"):
         if self.identifier != "":
             msg = f"{self.identifier}: {msg}"
-        if TERM_COLORS:
-            print(colored(msg, color), end=end)
-        else:
-            print(msg, end=end)
+        # if TERM_COLORS:
+        #     print(colored(msg, color), end=end)
+        # else:
+        #     print(msg, end=end)
+        print(msg, end=end)
     def err(self, msg: str, end: str = "\n"):
         if self.verbosity >= 1: self._print(msg, "red", end=end)
     def warn(self, msg: str, end: str = "\n"):
