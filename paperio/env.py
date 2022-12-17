@@ -20,32 +20,6 @@ ObsDict = Dict[AgentID, ObsType]
 ActionDict = Dict[AgentID, ActionType]
 
 class ACMAI2022(AECEnv):
-    """The AECEnv steps agents one at a time.
-
-    If you are unsure if you have implemented a AECEnv correctly, try running
-    the `api_test` documented in the Developer documentation on the website.
-    """
-
-    metadata: Dict[str, Any] = {"render.modes": ["human", "html", "rgb_array"], "name": "acmai_2022_paperio"}
-
-    # All agents that may appear in the environment
-    possible_agents: List[AgentID]
-    agents: List[AgentID]  # Agents active at any given time
-
-    # Whether each agent has just reached a terminal state
-    terminations: Dict[AgentID, bool]
-    truncations: Dict[AgentID, bool]
-    rewards: Dict[AgentID, float]  # Reward from the last step for each agent
-    # Cumulative rewards for each agent
-    _cumulative_rewards: Dict[AgentID, float]
-    infos: Dict[
-        AgentID, Dict[str, Any]
-    ]  # Additional information from the last step for each agent
-
-    agent_selection: AgentID  # The agent currently being stepped
-
-
-
     """
     Init Functions
     """
