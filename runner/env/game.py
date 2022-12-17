@@ -83,10 +83,8 @@ class GridEnvV2:
 
         player.update(direction)
 
-        resetting = False
         if player.reset:
             self.reset_player(player)
-            resetting = True
         else:
             c, r = player.pos
             player_cell = self.grid[r][c]
@@ -95,8 +93,8 @@ class GridEnvV2:
                 if len(reset_targets) > 1:
                     for target in reset_targets:
                         self.reset_player(target)
-                if (player.valid_collision()):
-                    self.reset_player(player)
+                
+                self.reset_player(player)
             elif player_cell == OCCUPIED:
                 occupied_by = self.player_grid[r][c]
                 if player.last_unoccupied and  occupied_by == player:

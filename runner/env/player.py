@@ -9,11 +9,8 @@ class Player:
         self.num = player_num
 
         """ Player Movement Location """
-        self.center_x, self.center_y = x, y
-        self.actual_x = self.center_x
-        self.actual_y = self.center_y
         self.direction = 0 #random.randrange(0,4) # pick a random starting direction
-        self.reset=False
+        self.reset = False
         self.last_unoccupied = False
 
         """ Player Territory Information """
@@ -23,11 +20,6 @@ class Player:
 
         """ Player Score """
         self.score = -1
-
-    def snap(self):
-        x, y = abs_to_grid_pos((self.actual_x, self.actual_y))
-        self.center_x, self.center_y = grid_to_abs_pos((x,y))
-        self.pos = (int(x), int(y))
 
     def update(self, direction):
 
@@ -49,11 +41,6 @@ class Player:
 
     def push_path(self, pos):
         if pos not in self.zone: self.path.add(pos)
-
-    def valid_collision(self):
-        if (self.old_pos == self.pos):
-            return False
-        return True
 
     def reset_player(self):
         self.reset = True

@@ -58,6 +58,8 @@ def main():
             game_data = env.get_game_data(player_id)
             game_data_json = json.loads(game_data)
 
+            # print(game_data)
+
             direction = agent.act(game_data_json["player_info"], game_data_json["game_info"])
 
             env.step(player_id, direction)
