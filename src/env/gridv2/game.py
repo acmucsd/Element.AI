@@ -6,12 +6,37 @@ from .player import Player
 from ..utils import *
 from .constants import *
 
+import json
+from json import JSONEncoder
+
+# class NumpyArrayEncoder:
+#     def __init__(self):
+#         self.init = True
+#     def default(self, obj):
+#         if isinstance(obj, np.ndarray):
+#             return obj.tolist()
+#         return JSONEncoder.default(self, obj)
+#     def decode(self, encoded_numpy_data, key):
+#         decoded = json.loads(encoded_numpy_data)
+#         numpy_array = np.asarray(decoded[key])
+#         return numpy_array
+#     def encode(self, arr):
+#         numpy_data = {"array": arr}
+#         encoded_numpy_data = json.dumps(numpy_data, cls=self)
+#         return encoded_numpy_data["array"]
+
+class NumpyArrayEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return JSONEncoder.default(self, obj)
+
 class GridEnvV2:
-    def __init__(self, render=False):
+    def __init__(self, num_players = 1):
         self.grid = np.zeros((ROW_COUNT, COLUMN_COUNT))
         self.player_grid = np.full((ROW_COUNT, COLUMN_COUNT), None)
         self.player_list = []
-        self.num_players = 4
+        self.num_players = num_players
 
         self.starting_coords = [
             (int(ROW_COUNT/4), int(COLUMN_COUNT/4)),
@@ -21,14 +46,10 @@ class GridEnvV2:
         ]
         self.setup()
 
-        self.renderWindow = None
-        if render:
-            self.renderWindow = RenderWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-
     def setup(self):
         for player_num in range(self.num_players):
             start_x, start_y = self.starting_coords[player_num]
-            self.player_list.append(Player(start_x, start_y))
+            self.player_list.append(Player(start_x, start_y, player_num))
             player = self.player_list[player_num]
             c, r = player.pos
             for cc in range(c-1, c + 2):
@@ -39,16 +60,16 @@ class GridEnvV2:
         self.place_boost_bomb()
 
     # direction should be -1 or 1
-    def step(self, direction):
-        for player in range(len(self.player_list)):
-            if player==0:
-                self.player_list[player].update(direction)
-            else:
-                continue # TODO random movement of other players
+    def step(self, player_num, direction, iteration):
+        player = self.player_list[player_num]
 
-        for player in self.player_list:
-            if player.reset:
-                self.reset_player(player)
+        player.update(direction)
+
+        resetting = False
+        if player.reset:
+            self.reset_player(player)
+            resetting = True
+        else:
             c, r = player.pos
             player_cell = self.grid[r][c]
             if player_cell == PASSED:
@@ -86,9 +107,21 @@ class GridEnvV2:
             else:
                 raise Exception("Unknown grid value")
 
-        if self.renderWindow:
-            self.render()
-        return self.player_list[0], self.player_grid
+
+        game_data = {
+            "num": player.num,
+            "pos": player.pos,
+            "direction": direction,
+            "resetting": resetting,
+            "iteration" : iteration,
+            "board_state": self.grid,
+            # "players_state": self.player_grid,
+            # TODO need to convert code so that self.player_grid contains the player_nums, not the player objects
+        }
+
+        encoded_game_data = json.dumps(game_data, cls=NumpyArrayEncoder)
+
+        print(encoded_game_data)
 
     def reset(self):
         print("Game Results:")

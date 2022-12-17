@@ -10,21 +10,18 @@ def create_env(env):
     if env.lower() == "gridv1":
         return GridEnvV1(GRID_CONSTANTS.SCREEN_WIDTH, GRID_CONSTANTS.SCREEN_HEIGHT, GRID_CONSTANTS.SCREEN_TITLE)
     elif env.lower() == "gridv2":
-        return GridEnvV2(render=True)
+        return GridEnvV2()
     elif env.lower() == "angular":
         return AngularEnv(ANGULAR_CONSTANTS.SCREEN_WIDTH, ANGULAR_CONSTANTS.SCREEN_HEIGHT, ANGULAR_CONSTANTS.SCREEN_TITLE)
     else:
         raise ValueError("Invalid env name")
 
-def step(env):
-    while True:
-        for i in range(10):
-            env.step(direction=1)
-        env.step(direction=-1)
+def step(env, player_num, direction):
+    env.step(player_num, direction)
 
 def run_env(env):
     if type(env) == GridEnvV2:
-        step(env)
+        step(env, 0, 1)
     else:
         env.setup()
         arcade.run()

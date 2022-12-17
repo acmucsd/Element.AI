@@ -4,14 +4,16 @@ from .constants import *
 
 
 class Player:
-    def __init__(self, x, y):
+    def __init__(self, x, y, player_num):
+
+        self.num = player_num
 
         """ Player Movement Location """
         self.movement_speed = 10 # need to adjust it to scale or something
         self.center_x, self.center_y = grid_to_abs_pos((x,y))
         self.actual_x = self.center_x
         self.actual_y = self.center_y
-        self.direction = random.randrange(0,4) # pick a random starting direction
+        self.direction = 0 #random.randrange(0,4) # pick a random starting direction
         self.reset=False
         self.last_unoccupied = False
 
@@ -39,9 +41,9 @@ class Player:
 
         self.actual_x += DIRECTIONS[self.direction][0]*self.movement_speed
         self.actual_y += DIRECTIONS[self.direction][1]*self.movement_speed
-        print(self.pos)
+        # print(self.pos)
         self.snap()
-        print(self.pos)
+        # print(self.pos)
 
         x,y = self.pos
         if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
