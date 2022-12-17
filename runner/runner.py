@@ -50,23 +50,39 @@ def main():
 
         for player_id in env.cfg.players:
 
+            """
+            Init Agents
+            """
             if (env.iteration == 0):
                 player_agents[player_id] = Agent(player_id)
 
+
+            """
+            Get Agent
+            """
             agent = player_agents[player_id]
             
+
+            """
+            Get Game State and Parse
+            """
             game_data = env.get_game_data(player_id)
             game_data_json = json.loads(game_data)
 
-            # print(game_data)
+            print(game_data)
 
-            direction = agent.act(game_data_json["player_info"], game_data_json["game_info"])
+            """
+            Get Direction Decision from Agent
+            """
+            direction = agent.act(player_state=game_data_json["player_info"], game_state=game_data_json["game_info"])
 
+
+            """
+            Implement Agent Decision in Environment
+            """
             env.step(player_id, direction)
 
         env.iteration += 1
-
-    return
 
 if __name__ == "__main__":
     main()

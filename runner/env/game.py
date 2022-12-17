@@ -23,7 +23,7 @@ class GridEnvV2:
 
         self.cfg = cfg
         self.iteration = 0
-        self.num_players = len(self.cfg.players)
+        self.num_players = len(cfg.players)
         self.grid = np.zeros((cfg.rows, cfg.cols))
         self.player_grid = np.full((cfg.rows, cfg.cols), None)
         self.player_dict = {}
@@ -35,12 +35,10 @@ class GridEnvV2:
             (int(cfg.rows/4)*3, int(cfg.cols/4)*3),
             (int(cfg.rows/4)*3, int(cfg.cols/4)),
         ]
-        self.setup()
-
-    def setup(self):
+        
         for player_num in range(self.num_players):
             start_x, start_y = self.starting_coords[player_num]
-            player = Player(start_x, start_y, player_num)
+            player = Player(start_x, start_y, player_num, self.cfg.rows, self.cfg.cols)
             self.player_dict[self.cfg.players[player_num]] = player
             c, r = player.pos
             for cc in range(c-1, c + 2):
@@ -48,12 +46,10 @@ class GridEnvV2:
                     self.grid[rr][cc] = OCCUPIED
                     self.player_grid[rr][cc] = player
                     player.push_zone((rr, cc))
+
         self.place_boost_bomb()
 
-    def start_game(self, player_id):
-
-        return self.get_game_data(self.player_dict[player_id], False)
-
+    # TODO: add to game_data to add useful info
     def get_game_data(self, player_id):
         player = self.player_dict[player_id]
         game_data = {
@@ -67,9 +63,11 @@ class GridEnvV2:
             },
             "game_info": {
                 "iteration" : self.iteration,
-                # "board_state": self.grid,
-                # "players_state": self.player_grid,
-                # TODO need to convert code so that self.player_grid contains the player_nums, not the player objects
+                # "board_state": self.grid,                 # working, commented out to shorten prints
+                # "players_state": self.player_grid,        # not working, see the below
+
+                # TODO: High Priority
+                # need to convert code so that self.player_grid contains the player_nums, not the player objects
             }
         }
 
@@ -77,12 +75,14 @@ class GridEnvV2:
 
         return encoded_game_data
 
-    # direction should be -1 or 1
     def step(self, player_id, direction):
         player = self.player_dict[player_id]
 
         player.update(direction)
 
+        # TODO: Low priority
+        # Note that much of the code below is checking edge cases that only arose in GridEnvV1
+        # It shouldn't be a problem, but may come up in testing, and should be cleaned eventually
         if player.reset:
             self.reset_player(player)
         else:
@@ -123,18 +123,9 @@ class GridEnvV2:
             else:
                 raise Exception("Unknown grid value")
 
-    def reset(self):
-        print("Game Results:")
-        for player in self.player_dict.values():
-            print(f"Player {player} earned {player.score} points!")
-        print("\n")
-
-        self.grid *= 0
-        self.player_grid = np.full((self.cfg.rows, COLUMN_COUNT), None)
-        self.player_dict = {}
-
-        # self.setup()
-
+    # TODO: Medium Priority
+    # Smarter boost and bomb placement
+    # Essentially tweak algo to have ideal # of bombs and boosts
     def place_boost_bomb(self, boost_count = BOOST_COUNT, bomb_count=BOMB_COUNT):
         # place boosts
         while (boost_count>0):
@@ -152,6 +143,9 @@ class GridEnvV2:
                 self.grid[x][y]= BOMB
                 bomb_count-=1
 
+    # TODO: High Priority
+    # Have game run continuously and only end when hit max_iterations
+    # This includes respawn functionality
     def reset_player(self, player):
         indices = np.where(self.player_grid == player)
 
