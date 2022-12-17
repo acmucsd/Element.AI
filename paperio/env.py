@@ -20,14 +20,15 @@ AgentID = str
 ObsDict = Dict[AgentID, ObsType]
 ActionDict = Dict[AgentID, ActionType]
 
-class ACMAI2022(AECEnv):
+class PaperIO(AECEnv):
     """
     Init Functions
     """
 
-    def __init__(self, env_cfg: EnvConfig):
+    def __init__(self, **kwargs):
 
-        self.env_cfg = env_cfg
+        default_config = EnvConfig(**kwargs)
+        self.env_cfg = default_config
 
         self.possible_agents = ["player_" + str(r) for r in range(self.env_cfg.max_players)]
 
