@@ -43,4 +43,3 @@ class Player:
     def reset_player(self):
         self.reset = True
         self.score = len(self.zone)
-        self.stopped = True

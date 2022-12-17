@@ -128,8 +128,6 @@ class PaperIO(ParallelEnv):
         return spaces.Dict(obs_space)
 
     def action_space(self, agent: str) -> gymnasium.spaces.Space:
-
-        player = self.player_dict[agent]
         
         act_space = spaces.Dict(
             allowed=spaces.Box(low=0, high=1, dtype=bool),             # NOTE: this will be used by speed algo
@@ -242,14 +240,14 @@ class PaperIO(ParallelEnv):
         )
 
         # TODO: High priority
-        # Implement reward dictionary, terminated dictionary, truncated dictionary and info dictionary
+        # Implement reward dictionary, terminated dictionary, truncated dictionary, and info dictionary
         return observations, dict(), dict(), dict(), dict()
         
 
     # TODO: High Priority
     # Have game run continuously and only end when hit max_iterations
     # This includes respawn functionality
-    def reset_player(self, player):
+    def reset_player(self, player: Player):
         indices = np.where(self.player_grid == player)
 
         for i in range(len(indices[0])):
