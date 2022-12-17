@@ -1,11 +1,10 @@
 import json
 from typing import Dict
-import sys
 from argparse import Namespace
 
-from env.utils import *
-from env.gridv2.game import GridEnvV2
-from env.gridv2.agent import Agent
+import uuid
+from env.game import GridEnvV2
+from agent import Agent
 
 ### DO NOT REMOVE THE FOLLOWING CODE ###
 agent_dict = dict() # store potentially multiple dictionaries as kaggle imports code directly
@@ -37,24 +36,29 @@ def main():
         except EOFError as eof:
             raise SystemExit(eof)
 
-    print('hello')
+    # NOTE: for now we will be running the environment and agents here for development purposes
+    # eventually will create episode.py file which handles everything at large
+    env = GridEnvV2(1)
 
-    i = 0
-    while (True):
-        inputs = read_input()
+    iteration = 0
+    player_id = 0
+    configurations = None
 
-        print('inputs', inputs, i)
-        i+=1
+    # init phase
+    player_id = uuid.uuid4()
 
-    # env = create_env("gridv2")
+    
 
-    # iteration = 0
-    # player_id = 0
-    # configurations = None
-    # while (iteration < 10):
-    #     direction = agent_fn(iteration)
-    #     env.step(player_id, direction, iteration)
-    #     iteration += 1
+    while (iteration < 1):
+        
+        # NOTE: these sections will be separated when we create the runner
+        # engine section
+        
+
+        # agent section
+        direction = agent_fn(iteration)
+        # env.step(player_id, direction, iteration)
+        iteration += 1
 
 if __name__ == "__main__":
     main()

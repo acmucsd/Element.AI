@@ -1,9 +1,7 @@
 import numpy as np
 import random
 import collections
-from .render import RenderWindow
 from .player import Player
-from ..utils import *
 from .constants import *
 
 import json
