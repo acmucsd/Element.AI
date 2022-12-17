@@ -25,40 +25,29 @@ def agent_fn(step: int):
 
     return direction
 
-# def main():
+def main():
 
-#     def read_input():
-#         """
-#         Reads input from stdin
-#         """
-#         try:
-#             return input()
-#         except EOFError as eof:
-#             raise SystemExit(eof)
-
-#     # NOTE: for now we will be running the environment and agents here for development purposes
-#     # eventually will create episode.py file which handles everything at large
-#     env = GridEnvV2(1)
-
-#     iteration = 0
-#     player_id = 0
-#     configurations = None
-
-#     # init phase
-#     player_id = uuid.uuid4()
+    def read_input():
+        """
+        Reads input from stdin
+        """
+        try:
+            return input()
+        except EOFError as eof:
+            raise SystemExit(eof)
 
     
 
-#     while (iteration < 1):
+    while (iteration < 1):
         
-#         # NOTE: these sections will be separated when we create the runner
-#         # engine section
+        # NOTE: these sections will be separated when we create the runner
+        # engine section
         
 
-#         # agent section
-#         direction = agent_fn(iteration)
-#         # env.step(player_id, direction, iteration)
-#         iteration += 1
+        # agent section
+        direction = agent_fn(iteration)
+        # env.step(player_id, direction, iteration)
+        iteration += 1
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

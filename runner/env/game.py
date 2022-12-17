@@ -49,12 +49,13 @@ class GridEnvV2:
                     self.player_grid[rr][cc] = player
                     player.push_zone((rr, cc))
         self.place_boost_bomb()
-        self.start_game(self.player_dict[self.cfg.players[0]])
 
-    def start_game(self, player):
-        self.print_game_data(player, False)
+    def start_game(self, player_id):
 
-    def print_game_data(self, player, resetting):
+        return self.get_game_data(self.player_dict[player_id], False)
+
+    def get_game_data(self, player_id):
+        player = self.player_dict[player_id]
         game_data = {
             "player_info": {
                 "player_num": player.num,
@@ -62,10 +63,10 @@ class GridEnvV2:
                 "head": player.pos,
                 "tail": player.path,
                 "zone": player.zone,
-                "resetting": resetting,
+                "resetting": player.reset,
             },
             "game_info": {
-                "game_iteration" : self.iteration,
+                "iteration" : self.iteration,
                 # "board_state": self.grid,
                 # "players_state": self.player_grid,
                 # TODO need to convert code so that self.player_grid contains the player_nums, not the player objects
@@ -74,7 +75,7 @@ class GridEnvV2:
 
         encoded_game_data = json.dumps(to_json(game_data))
 
-        print(encoded_game_data)
+        return encoded_game_data
 
     # direction should be -1 or 1
     def step(self, player_id, direction):
@@ -123,9 +124,6 @@ class GridEnvV2:
                 player.movement_speed+=1
             else:
                 raise Exception("Unknown grid value")
-
-
-        self.print_game_data(player, resetting)
 
     def reset(self):
         print("Game Results:")

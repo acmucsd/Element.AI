@@ -1,5 +1,7 @@
 import argparse
 from env.game import GridEnvV2, EnvConfig
+from agent.agent import Agent
+import json
 
 def main():
 
@@ -42,13 +44,25 @@ def main():
         except EOFError as eof:
             raise SystemExit(eof)
     
-    # env.iteration = 0
-    # while (env.iteration < env.cfg.max_iterations):
+    env.iteration = 0
+    player_agents = {}
+    while (env.iteration < env.cfg.max_iterations):
 
-    #     for player_id in env.cfg.players:
-    #         json_str = read_input()
+        for player_id in env.cfg.players:
 
-    #     env.iteration += 1
+            if (env.iteration == 0):
+                player_agents[player_id] = Agent(player_id)
+
+            agent = player_agents[player_id]
+            
+            game_data = env.get_game_data(player_id)
+            game_data_json = json.loads(game_data)
+
+            direction = agent.act(game_data_json["player_info"], game_data_json["game_info"])
+
+            env.step(player_id, direction)
+
+        env.iteration += 1
 
     return
 

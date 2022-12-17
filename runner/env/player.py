@@ -9,8 +9,7 @@ class Player:
         self.num = player_num
 
         """ Player Movement Location """
-        self.movement_speed = 10 # need to adjust it to scale or something
-        self.center_x, self.center_y = grid_to_abs_pos((x,y))
+        self.center_x, self.center_y = x, y
         self.actual_x = self.center_x
         self.actual_y = self.center_y
         self.direction = 0 #random.randrange(0,4) # pick a random starting direction
@@ -33,19 +32,12 @@ class Player:
     def update(self, direction):
 
         self.direction += direction
-        self.direction = (self.direction+4) % len(DIRECTIONS)
+        self.direction %= len(DIRECTIONS)
 
-        self.old_pos = self.pos
-        self.old_path = self.path
-        self.old_zone = self.zone
+        x = self.pos[0] + DIRECTIONS[self.direction][0]
+        y = self.pos[1] + DIRECTIONS[self.direction][1]
 
-        self.actual_x += DIRECTIONS[self.direction][0]*self.movement_speed
-        self.actual_y += DIRECTIONS[self.direction][1]*self.movement_speed
-        # print(self.pos)
-        self.snap()
-        # print(self.pos)
-
-        x,y = self.pos
+        self.pos = (x, y)
         if x < 0 or x>= ROW_COUNT or y < 0 or y>=COLUMN_COUNT:
             self.reset = True
 
