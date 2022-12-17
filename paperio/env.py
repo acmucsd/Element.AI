@@ -57,16 +57,17 @@ class ACMAI2022(AECEnv):
         self.possible_agents = ["player_" + str(r) for r in range(self.env_cfg.max_players)]
 
         self.agents = self.possible_agents
-
         self.max_episode_length = self.env_cfg.max_episode_length
-        self.iteration = 0
-        self.agent_selection = self.agents[0]
 
         self.setup()
 
         pass
 
     def setup(self):
+
+        self.iteration = 0
+        self.agent_selection = self.agents[0]
+
         # TODO smarter spawning
         map_size = self.env_cfg.map_size
         self.starting_coords = [
@@ -209,16 +210,14 @@ class ACMAI2022(AECEnv):
         """
         raise NotImplementedError
 
-    def reset(
-        self,
-        seed: Optional[int] = None,
-        return_info: bool = False,
-        options: Optional[dict] = None,
-    ) -> None:
-        """Resets the environment to a starting state."""
-        raise NotImplementedError
+    def reset(self, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None) -> None:
+        self.setup()
 
-    def render(self):
+    # TODO: medium priority
+    # add mode='rgb_array' support
+    # TODO: very low priority
+    # add mode='human' support (pygame)
+    def render(self, mode='rgb_array'):
         """Renders the environment as specified by self.render_mode.
 
         Render mode can be `human` to display a window.
@@ -228,24 +227,26 @@ class ACMAI2022(AECEnv):
         """
         raise NotImplementedError
 
-    def state(self) -> np.ndarray:
-        """State returns a global view of the environment.
+    # NOTE: seems redundant, all board info already given to agent in observe()
+    # def state(self) -> np.ndarray:
+    #     """State returns a global view of the environment.
 
-        It is appropriate for centralized training decentralized execution methods like QMIX
-        """
-        raise NotImplementedError(
-            "state() method has not been implemented in the environment {}.".format(
-                self.metadata.get("name", self.__class__.__name__)
-            )
-        )
+    #     It is appropriate for centralized training decentralized execution methods like QMIX
+    #     """
+    #     raise NotImplementedError(
+    #         "state() method has not been implemented in the environment {}.".format(
+    #             self.metadata.get("name", self.__class__.__name__)
+    #         )
+    #     )
 
-    def close(self):
-        """Closes any resources that should be released.
+    # NOTE: only necessary if we implement pygame for render(mode='human')
+    # def close(self):
+    #     """Closes any resources that should be released.
 
-        Closes the rendering window, subprocesses, network connections,
-        or any other resources that should be released.
-        """
-        pass
+    #     Closes the rendering window, subprocesses, network connections,
+    #     or any other resources that should be released.
+    #     """
+    #     pass
 
     # NOTE: seed will be useful only when we implement seed-based bomb/boost placement
     # def seed(self, seed: Optional[int] = None) -> None:
