@@ -66,7 +66,8 @@ class ACMAI2022(AECEnv):
     def setup(self):
 
         self.iteration = 0
-        self.agent_selection = self.agents[0]
+        self.agent_selection_num = 0
+        self.agent_selection = self.agents[self.agent_selection_num]
 
         # TODO smarter spawning
         map_size = self.env_cfg.map_size
@@ -132,24 +133,23 @@ class ACMAI2022(AECEnv):
 
         game_data = {
             agent: {
-                "player_num": player.num,
-                "direction": DIRECTIONS[player.direction],
-                "resetting": player.reset,
-                "head": player.pos,
+                'player_num': player.num,
+                'direction': DIRECTIONS[player.direction],
+                'resetting': player.reset,
+                'head': player.pos,
                 # NOTE: see observation_space function
                 # "tail": player.path,
                 # "zone": player.zone,
             },
-            "board": {
-                "iteration" : self.iteration,
-                "board_state": self.grid,
+            'board': {
+                'iteration' : self.iteration,
+                'board_state': self.grid,
                 # NOTE: see observation_space function
                 # "players_state": self.player_grid,
             }
         }
 
         return game_data
-
 
     def observation_space(self, agent: AgentID) -> gymnasium.spaces.Space:
         
@@ -166,7 +166,7 @@ class ACMAI2022(AECEnv):
             # "zone": player.zone,
         )
 
-        obs_space["board"] = spaces.Dict(
+        obs_space['board'] = spaces.Dict(
             iteration=spaces.Discrete(self.env_cfg.max_episode_length),
             board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
             # TODO: High Priority
@@ -204,11 +204,58 @@ class ACMAI2022(AECEnv):
     """
 
     def step(self, action: ActionType) -> None:
-        """Accepts and executes the action of the current agent_selection in the environment.
+        player = self.player_dict[self.agent_selection]
 
-        Automatically switches control to the next agent.
-        """
-        raise NotImplementedError
+        turn = action['turn']
+        player.update(turn)
+
+        # TODO: Low priority
+        # Note that much of the code below is checking edge cases that only arose in GridEnvV1
+        # due to the clock-based system used in arcade
+        # It shouldn't be a problem, but may come up in testing, and should be cleaned eventually
+        # for performance improvements
+        if player.reset:
+            self.reset_player(player)
+        else:
+            c, r = player.pos
+            player_cell = self.grid[r][c]
+            if player_cell == PASSED:
+                reset_targets = [p for p in self.player_dict.values() if p.pos == player.pos]
+                if len(reset_targets) > 1:
+                    for target in reset_targets:
+                        self.reset_player(target)
+                
+                self.reset_player(player)
+            elif player_cell == OCCUPIED:
+                occupied_by = self.player_grid[r][c]
+                if player.last_unoccupied and  occupied_by == player:
+                    self.update_occupancy(player)
+                    player.last_unoccupied = False
+                elif occupied_by != player:
+                    occupied_by.pop_zone((r,c))
+                    self.grid[r][c] = PASSED
+                    self.player_grid[r][c] = player
+                    player.last_unoccupied = True
+            elif player_cell == UNOCCUPIED:
+                self.grid[r][c] = PASSED
+                self.player_grid[r][c] = player
+                player.push_path((c,r))
+                player.last_unoccupied = True
+            elif player_cell == BOMB:
+                self.reset_player(player)
+                self.grid[r][c] = PASSED
+                self.player_grid[r][c] = player
+            elif player_cell == BOOST:
+                self.grid[r][c] = PASSED
+                self.player_grid[r][c] = player
+                player.push_path((c,r))
+                player.last_unoccupied = True
+                player.movement_speed+=1
+            else:
+                raise Exception("Unknown grid value")
+
+        self.agent_selection_num += 1
+        self.agent_selection_num %= self.num_agents
 
     def reset(self, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None) -> None:
         self.setup()

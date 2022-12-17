@@ -24,9 +24,9 @@ class Player:
         """ Game-Related Values """
         self.map_size = map_size
 
-    def update(self, direction):
+    def update(self, turn):
 
-        self.direction += direction
+        self.direction += turn
         self.direction %= len(DIRECTIONS)
 
         x = self.pos[0] + DIRECTIONS[self.direction][0]
