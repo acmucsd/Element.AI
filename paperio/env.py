@@ -72,9 +72,9 @@ class PaperIO(ParallelEnv):
         ]
 
         self.player_dict = dict()
-        self.grid = np.zeros((map_size, map_size))
+        self.grid = np.zeros((map_size, map_size), dtype=np.uint8)
         self.player_grid = np.full((map_size, map_size), None)
-        self.player_num_grid = np.full((map_size, map_size), -1)
+        self.player_num_grid = np.full((map_size, map_size), -1, dtype=np.uint8)
         
         for player_num in range(self.num_agents):
             start_x, start_y = self.starting_coords[player_num]
@@ -351,10 +351,10 @@ class PaperIO(ParallelEnv):
             raise NotImplementedError
         elif (mode == 'rgb_array'):
             self.player_colors = [
-                (np.array(color.YELLOW_ORANGE), np.array(color.SAPPHIRE_BLUE)),
-                (np.array(color.HOT_PINK), np.array(color.SAP_GREEN)),
-                (np.array(color.RED_ORANGE), np.array(color.TEAL)),
-                (np.array(color.GOLD), np.array(color.PURPLE_HEART)),
+                (np.array(color.YELLOW_ORANGE, dtype=np.uint8), np.array(color.SAPPHIRE_BLUE, dtype=np.uint8)),
+                (np.array(color.HOT_PINK, dtype=np.uint8), np.array(color.SAP_GREEN, dtype=np.uint8)),
+                (np.array(color.RED_ORANGE, dtype=np.uint8), np.array(color.TEAL, dtype=np.uint8)),
+                (np.array(color.GOLD, dtype=np.uint8), np.array(color.PURPLE_HEART, dtype=np.uint8)),
             ]
 
             WHITE_SMOKE = np.array(color.WHITE_SMOKE)
@@ -362,7 +362,7 @@ class PaperIO(ParallelEnv):
             PURPLE = np.array(color.PURPLE)
 
             map_size = self.env_cfg.map_size
-            rgb_array = np.zeros((map_size, map_size, 3))
+            rgb_array = np.zeros((map_size, map_size, 3), dtype=np.uint8)
 
             for r in range(map_size):
                 for c in range(map_size):
