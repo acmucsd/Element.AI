@@ -31,21 +31,22 @@ def from_json(state):
         return state 
 
 def process_obs(player, game_state, step, obs):
-    if step == 0:
-        # at step 0 we get the entire map information
-        game_state = from_json(obs)
-    else:
-        # use delta changes to board to update game state
-        obs = from_json(obs)
-        for k in obs:
-            if k != 'board':
-                game_state[k] = obs[k]
-            else:
-                if "valid_spawns_mask" in obs[k]:
-                    game_state["board"]["valid_spawns_mask"] = obs[k]["valid_spawns_mask"]
-        for item in ["rubble", "lichen", "lichen_strains"]:
-            for k, v in obs["board"][item].items():
-                k = k.split(",")
-                x, y = int(k[0]), int(k[1])
-                game_state["board"][item][x, y] = v
-    return game_state
+    return from_json(obs)
+    # if step == 0:
+    #     # at step 0 we get the entire map information
+    #     game_state = from_json(obs)
+    # else:
+    #     # use delta changes to board to update game state
+    #     obs = from_json(obs)
+    #     for k in obs:
+    #         if k != 'board':
+    #             game_state[k] = obs[k]
+    #         else:
+    #             if "valid_spawns_mask" in obs[k]:
+    #                 game_state["board"]["valid_spawns_mask"] = obs[k]["valid_spawns_mask"]
+    #     for item in ["rubble", "lichen", "lichen_strains"]:
+    #         for k, v in obs["board"][item].items():
+    #             k = k.split(",")
+    #             x, y = int(k[0]), int(k[1])
+    #             game_state["board"][item][x, y] = v
+    # return game_state

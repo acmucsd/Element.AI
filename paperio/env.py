@@ -8,6 +8,7 @@ from gym import spaces
 import numpy as np
 import random
 import collections
+import sys
 
 from .config import EnvConfig
 from .player import Player
@@ -51,6 +52,7 @@ class PaperIO(ParallelEnv):
         self.possible_agents = ["player_" + str(r) for r in range(self.env_cfg.max_players)]
 
         self.agents = self.possible_agents[:self.env_cfg.num_players]
+
         self.max_episode_length = self.env_cfg.max_episode_length
 
         self.setup()
@@ -163,12 +165,14 @@ class PaperIO(ParallelEnv):
         """
         players_moving = []
 
-        for agent in actions.keys():
+        for agent in actions:
             action = actions[agent]
+            player: Player = self.player_dict[agent] 
 
-            if (True):
+            action_allowed = (not player.reset) and (action != None)
+
+            if (action_allowed):
                 turn = action['turn']
-                player: Player = self.player_dict[agent] 
 
                 player.update(turn)
                 players_moving.append(player)

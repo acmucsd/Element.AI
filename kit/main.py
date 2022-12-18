@@ -25,7 +25,7 @@ def agent_fn(observation):
     obs = process_obs(player, agent_prev_obs[player], step, json.loads(observation.obs))
     agent_prev_obs[player] = obs
     agent.step = step
-
+    
     actions = agent.act(step, obs, remainingOverageTime)
 
     return process_action(actions)

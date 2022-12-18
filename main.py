@@ -2,6 +2,7 @@ import asyncio
 from typing import Dict, List
 import numpy as np
 import json
+import sys
 # from omegaconf import OmegaConf
 
 from luxai_runner.bot import Bot
@@ -48,6 +49,7 @@ def main():
             env_cls=PaperIO,
             # seed=args.seed,
             env_cfg=dict(
+                num_players=len(args.players),
                 # verbose=args.verbose,
                 # validate_action_space=not args.skip_validate_action_space,
                 max_episode_length=args.len,
@@ -60,7 +62,6 @@ def main():
             # ),
             # render=args.render
         )
-
 
     import time
     stime = time.time()

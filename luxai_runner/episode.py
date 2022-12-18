@@ -11,6 +11,7 @@ import numpy as np
 import dataclasses
 from luxai_runner.utils import to_json
 import os.path as osp
+import sys
 
 @dataclass 
 class ReplayConfig:
@@ -89,8 +90,6 @@ class Episode:
                 env_cfg=dataclasses.asdict(env_cfg)
             )
         
-        print(obs)
-
         if save_replay:
             replay = dict(observations=[], actions=[], dones=[], rewards=[])
             replay["observations"].append(state_obs)
@@ -100,7 +99,7 @@ class Episode:
             #     replay["observations"].append(self.env.state.get_obs())
 
         i = 0
-        while (i < 1):#not game_done:
+        while not game_done:
             i += 1
             # print("===", self.env.env_steps)
             actions = dict()
@@ -131,8 +130,6 @@ class Episode:
             # state_obs = new_state_obs["player_0"]
             # obs = to_json(change_obs)
             obs = to_json(new_state_obs)
-
-            print(obs)
 
             if save_replay:
                 replay["observations"].append(obs)

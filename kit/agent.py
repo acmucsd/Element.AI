@@ -6,6 +6,7 @@ class Agent():
         np.random.seed(0)
 
     def act(self, step: int, obs, remainingOverageTime: int = 60):
+
         direction = step % 3 - 1
 
         action = {
