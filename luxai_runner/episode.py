@@ -92,11 +92,8 @@ class Episode:
         
         if save_replay:
             replay = dict(observations=[], actions=[], dones=[], rewards=[])
-            replay["observations"].append(state_obs)
-            # if self.cfg.replay_options.compressed_obs:
-            #     replay["observations"].append(state_obs)
-            # else:
-            #     replay["observations"].append(self.env.state.get_obs())
+            # replay["observations"].append(state_obs)
+            replay['observations'].append(self.env.render(mode='rgb_array'))
 
         i = 0
         while not game_done:
@@ -132,11 +129,8 @@ class Episode:
             obs = to_json(new_state_obs)
 
             if save_replay:
-                replay["observations"].append(obs)
-                # if self.cfg.replay_options.compressed_obs:
-                #     replay["observations"].append(obs)
-                # else:
-                #     replay["observations"].append(self.env.state.get_obs())
+                replay['observations'].append(self.env.render(mode='rgb_array'))
+                # replay["observations"].append(obs)
                 replay["actions"].append(actions)
                 replay["rewards"].append(rewards)
                 replay["dones"].append(dones)

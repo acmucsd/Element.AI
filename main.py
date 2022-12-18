@@ -20,15 +20,15 @@ def main():
     parser.add_argument("players", nargs="+", help="Paths to player modules. If --tournament is passed as well, you can also pass a folder and we will look through all sub-folders for valid agents with main.py files (only works for python agents at the moment).")
     parser.add_argument("-l", "--len", help="Max episode length", type=int, default=300)
 
-    # # replay configs
-    # parser.add_argument("-o", "--output", help="Where to output replays. Default is none and no replay is generated")
-    # parser.add_argument("--replay.save_format", help="Save format \"json\" works with the visualizer while pickle is a compact, python usable version", default="json")
+    # replay configs
+    parser.add_argument("-o", "--output", help="Where to output replays. Default is none and no replay is generated")
+    parser.add_argument("--replay.save_format", help="Save format \"json\" works with the visualizer while pickle is a compact, python usable version", default="json")
     # parser.add_argument("--replay.compressed_obs", help="Whether to save compressed observations or not. Compressed observations do not contain the full observation at each step. In particular, the map information is stored as the first observation, subsequent observations only store the changes that happened.", default=True)
 
-    # # episode configs
-    # parser.add_argument(
-    #     "-v", "--verbose", help="Verbose Level (0 = silent, 1 = errors, 2 = warnings, 3 = info)", type=int, default=1
-    # )
+    # episode configs
+    parser.add_argument(
+        "-v", "--verbose", help="Verbose Level (0 = silent, 1 = errors, 2 = warnings, 3 = info)", type=int, default=1
+    )
     # parser.add_argument("-s", "--seed", help="Fix a seed for episode(s). All episodes will initialize the same.", type=int)
 
     # env configs
@@ -53,13 +53,14 @@ def main():
                 # verbose=args.verbose,
                 # validate_action_space=not args.skip_validate_action_space,
                 max_episode_length=args.len,
+                map_size=100,
             ),
             # verbosity=args.verbose,
-            # save_replay_path=args.output,
-            # replay_options=ReplayConfig(
-            #     save_format=getattr(args, "replay.save_format"),
-            #     compressed_obs=getattr(args, "replay.compressed_obs")
-            # ),
+            save_replay_path=args.output,
+            replay_options=ReplayConfig(
+                save_format=getattr(args, "replay.save_format"),
+                # compressed_obs=getattr(args, "replay.compressed_obs")
+            ),
             # render=args.render
         )
 

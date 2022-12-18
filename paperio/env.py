@@ -9,6 +9,7 @@ import numpy as np
 import random
 import collections
 import sys
+from arcade import color
 
 from .config import EnvConfig
 from .player import Player
@@ -73,6 +74,7 @@ class PaperIO(ParallelEnv):
         self.player_dict = dict()
         self.grid = np.zeros((map_size, map_size))
         self.player_grid = np.full((map_size, map_size), None)
+        self.player_num_grid = np.full((map_size, map_size), -1)
         
         for player_num in range(self.num_agents):
             start_x, start_y = self.starting_coords[player_num]
@@ -83,6 +85,7 @@ class PaperIO(ParallelEnv):
                 for rr in range(r-1, r + 2):
                     self.grid[rr][cc] = OCCUPIED
                     self.player_grid[rr][cc] = player
+                    self.player_num_grid[rr][cc] = player.num
                     player.push_zone((rr, cc))
 
         self.place_boost_bomb()
@@ -211,19 +214,23 @@ class PaperIO(ParallelEnv):
                             occupied_by.pop_zone((r,c))
                             self.grid[r][c] = PASSED
                             self.player_grid[r][c] = player
+                            self.player_num_grid[r][c] = player.num
                             player.last_unoccupied = True
                     elif player_cell == UNOCCUPIED:
                         self.grid[r][c] = PASSED
                         self.player_grid[r][c] = player
+                        self.player_num_grid[r][c] = player.num
                         player.push_path((c,r))
                         player.last_unoccupied = True
                     elif player_cell == BOMB:
                         self.reset_player(player)
                         self.grid[r][c] = PASSED
                         self.player_grid[r][c] = player
+                        self.player_num_grid[r][c] = player.num
                     elif player_cell == BOOST:
                         self.grid[r][c] = PASSED
                         self.player_grid[r][c] = player
+                        self.player_num_grid[r][c] = player.num
                         player.push_path((c,r))
                         player.last_unoccupied = True
                         # TODO: Speed algo
@@ -274,13 +281,14 @@ class PaperIO(ParallelEnv):
     # Have game run continuously and only end when hit max_iterations
     # This includes respawn functionality
     def reset_player(self, player: Player):
-        indices = np.where(self.player_grid == player)
+        indices = np.where(self.player_num_grid == player.num)
 
         for i in range(len(indices[0])):
             x = indices[0][i]
             y = indices[1][i]
             self.grid[x][y] = UNOCCUPIED
             self.player_grid[x][y] = None
+            self.player_num_grid[x][y] = -1
 
         player.reset_player()
 
@@ -306,10 +314,12 @@ class PaperIO(ParallelEnv):
                 if (occupied_by == player and cell == PASSED) or cell == UNOCCUPIED:
                     self.grid[r][c] = OCCUPIED
                     self.player_grid[r][c] = player
+                    self.player_num_grid[r][c] = player.num
                     player.push_zone((c,r))
                 elif cell == -1:
                     self.grid[r][c] = UNOCCUPIED
                     self.player_grid[r][c] = None
+                    self.player_num_grid[r][c] = -1
 
     # TODO
     def reset(
@@ -367,15 +377,40 @@ class PaperIO(ParallelEnv):
     # add mode='rgb_array' support
     # TODO: very low priority
     # add mode='human' support (pygame)
-    # def render(self, mode='rgb_array'):
-    #     """Renders the environment as specified by self.render_mode.
+    def render(self, mode='rgb_array'):
+        if (mode == 'human'):
+            raise NotImplementedError
+        elif (mode == 'rgb_array'):
+            self.player_colors = [
+                (np.array(color.YELLOW_ORANGE), np.array(color.SAPPHIRE_BLUE)),
+                (np.array(color.HOT_PINK), np.array(color.SAP_GREEN)),
+                (np.array(color.RED_ORANGE), np.array(color.TEAL)),
+                (np.array(color.GOLD), np.array(color.PURPLE_HEART)),
+            ]
 
-    #     Render mode can be `human` to display a window.
-    #     Other render modes in the default environments are `'rgb_array'`
-    #     which returns a numpy array and is supported by all environments outside of classic,
-    #     and `'ansi'` which returns the strings printed (specific to classic environments).
-    #     """
-    #     raise NotImplementedError
+            WHITE_SMOKE = np.array(color.WHITE_SMOKE)
+            BLACK = np.array(color.BLACK)
+            PURPLE = np.array(color.PURPLE)
+
+            map_size = self.env_cfg.map_size
+            rgb_array = np.zeros((map_size, map_size, 3))
+
+            for r in range(map_size):
+                for c in range(map_size):
+                    if self.grid[r][c] == UNOCCUPIED:
+                        rgb_array[r][c] = WHITE_SMOKE
+                    elif self.grid[r][c] == BOMB:
+                        rgb_array[r][c] = BLACK
+                    elif self.grid[r][c] == BOOST:
+                        rgb_array[r][c] = PURPLE
+                    elif self.grid[r][c] == PASSED:
+                        rgb_array[r][c] = self.player_colors[self.player_num_grid[r][c]][0]
+                    elif self.grid[r][c] == OCCUPIED:
+                        rgb_array[r][c] = self.player_colors[self.player_num_grid[r][c]][1]
+                    else:
+                        raise Exception("Unknown grid value")
+
+            return rgb_array
 
     # NOTE: only necessary if we implement pygame for render(mode='human')
     # def close(self):
