@@ -93,6 +93,7 @@ class PaperIO(ParallelEnv):
 
     # TODO: Medium Priority
     # seed-based bomb and boost placement (deterministic env)
+    # will also need to handle seed being passed from reset() func
     # TODO: Medium Priority
     # Smarter boost and bomb placement
     # Essentially tweak algo to have ideal # of bombs and boosts in good locations
@@ -141,9 +142,7 @@ class PaperIO(ParallelEnv):
         obs_space['board'] = spaces.Dict(
             iteration=spaces.Discrete(self.env_cfg.max_episode_length),
             board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
-            # TODO: High Priority
-            # need to convert code so that self.player_grid contains the player_nums, not the player objects
-            # "players_state": self.player_grid,
+            players_state=spaces.Box(low=-1, high=(self.num_agents-1), shape=self.player_num_grid.shape, dtype=self.player_num_grid.dtype),
         )
 
         return spaces.Dict(obs_space)
@@ -233,12 +232,17 @@ class PaperIO(ParallelEnv):
                         self.player_num_grid[r][c] = player.num
                         player.push_path((c,r))
                         player.last_unoccupied = True
-                        # TODO: Speed algo
+                        # TODO: High Priority
+                        # Speed algo
                         # player.movement_speed+=1
                     else:
                         raise Exception("Unknown grid value")
         
         self.env_steps += 1
+        
+        return self.observe()
+
+    def observe(self):
         env_done = self.env_steps == self.env_cfg.max_episode_length
 
         observations = dict()
@@ -268,10 +272,8 @@ class PaperIO(ParallelEnv):
 
         observations['board'] = {
             'iteration': self.env_steps,
-            # 'board_state': self.grid,
-            # TODO: High Priority
-            # need to convert code so that self.player_grid contains the player_nums, not the player objects
-            # "players_state": self.player_grid,
+            'board_state': self.grid,
+            "players_state": self.player_num_grid,
         }
 
         return observations, rewards, dones, infos
@@ -321,7 +323,7 @@ class PaperIO(ParallelEnv):
                     self.player_grid[r][c] = None
                     self.player_num_grid[r][c] = -1
 
-    # TODO
+    # NOTE will need to handle seed stuff when that's implemented
     def reset(
         self,
         seed: Optional[int] = None,
@@ -330,40 +332,7 @@ class PaperIO(ParallelEnv):
     ) -> ObsDict:
         self.setup()
 
-        observations = dict()
-        rewards = dict()
-        dones = dict()
-        infos = dict()
-
-        for agent in self.agents:
-            player:Player = self.player_dict[agent]
-
-            observations[agent] = {
-                'player_num': player.num,
-                'direction': DIRECTIONS[player.direction],
-                'resetting': player.reset,
-                'head': player.pos,
-                # NOTE: see observation_space function
-                # "tail": player.path,
-                # "zone": player.zone,
-            }
-
-            # TODO: High priority
-            # Implement rewards and infos discts
-            # NOTE: dones is false until hit max_episode_length
-            rewards[agent] = len(player.zone)
-            dones[agent] = False
-            infos[agent] = None
-
-        observations['board'] = {
-            'iteration': self.env_steps,
-            # 'board_state': self.grid,
-            # TODO: High Priority
-            # need to convert code so that self.player_grid contains the player_nums, not the player objects
-            # "players_state": self.player_grid,
-        }
-
-        return observations
+        return self.observe()
     
 
     # NOTE: seed will be useful only when we implement seed-based bomb/boost placement
@@ -373,10 +342,10 @@ class PaperIO(ParallelEnv):
     #         "Calling seed externally is deprecated; call reset(seed=seed) instead"
     #     )
 
-    # TODO: medium priority
-    # add mode='rgb_array' support
-    # TODO: very low priority
-    # add mode='human' support (pygame)
+    # TODO: high priority
+    # make mode='rgb_array' more efficient
+    # add mode='human' support (pygame -- see luxai2022 comp for an example)
+    # NOTE: for pygame will need to implement close() method below
     def render(self, mode='rgb_array'):
         if (mode == 'human'):
             raise NotImplementedError
@@ -417,7 +386,7 @@ class PaperIO(ParallelEnv):
     #     """Closes the rendering window."""
     #     pass
 
-    # NOTE: seems redundant, all board info already given to agent in observe()
+    # NOTE: seems redundant, all necessary board info already given to agent in observe()
     # def state(self) -> np.ndarray:
     #     """Returns the state.
 
