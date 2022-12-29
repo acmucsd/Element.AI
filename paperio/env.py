@@ -91,6 +91,9 @@ class PaperIO(ParallelEnv):
                     self.player_num_grid[rr][cc] = player.num
                     player.push_zone((rr, cc))
 
+        self.energies = [0] * self.num_agents
+        self.speeds = [1] * self.num_agents
+
         self.place_boost_bomb()
 
 
@@ -162,7 +165,28 @@ class PaperIO(ParallelEnv):
     Env Runtime Functions
     """
 
-    def step(self, actions: ActionDict, initialRound=True):
+    def update_speeds(self):
+        # NOTE: This need to be adjusted once better spawn algo done
+        # resultant speeds:
+        #               2, 3, 4,  5
+        req_energies = [2, 4, 11, 20]
+
+        i = 0
+        for energy in self.energies:
+            speed = 1
+            for req in req_energies:
+                if (energy >= req):
+                    speed += 1
+                else:
+                    break
+            self.speeds[i] = speed
+            i += 1
+
+    def _update_env(self):
+        self.update_speeds()
+        self.env_steps += 1
+
+    def step(self, actions: ActionDict):
         """Receives a dictionary of actions keyed by the agent name.
 
         Returns the observation dictionary, reward dictionary, terminated dictionary, truncated dictionary
@@ -187,12 +211,11 @@ class PaperIO(ParallelEnv):
         # due to the clock-based system used in arcade
         # It shouldn't be a problem, but may come up in testing, and should be cleaned eventually
         # for performance improvements
+        # Also ideally we remove self.player_grid and move to only using self.player_num_grid
         for x in players_moving:
             player: Player = x
 
-            if initialRound and player.reset:
-                self.reset_player(player)
-            elif (player.reset):
+            if (player.reset):
                 continue
             else:
                 c, r = player.pos
@@ -235,13 +258,9 @@ class PaperIO(ParallelEnv):
                         self.player_num_grid[r][c] = player.num
                         player.push_path((c,r))
                         player.last_unoccupied = True
-                        # TODO: High Priority
-                        # Speed algo
-                        # player.movement_speed+=1
+                        self.energies[player.num] += 1
                     else:
                         raise Exception("Unknown grid value")
-        
-        self.env_steps += 1
         
         return self.observe()
 
@@ -294,6 +313,9 @@ class PaperIO(ParallelEnv):
             self.grid[x][y] = UNOCCUPIED
             self.player_grid[x][y] = None
             self.player_num_grid[x][y] = -1
+
+        self.energies[player.num] = 0
+        player.moves_left = 0
 
         player.reset_player()
 

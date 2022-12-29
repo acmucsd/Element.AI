@@ -99,52 +99,61 @@ class Episode:
         i = 0
         while not game_done:
             i += 1
-            # print("===", self.env.env_steps)
-            actions = dict()
-            
-            agent_ids = []
-            action_coros = []
-            for player in players.values():
-                action = player.step(obs, self.env.env_steps, rewards[agent], infos[agent])
-                action_coros += [action]
-                agent_ids += [player.agent]
-            resolved_actions = await asyncio.gather(*action_coros)
-            for agent_id, action in zip(agent_ids, resolved_actions):
-                try:
-                    for k in action:
-                        if type(action[k]) == list:
-                            action[k] = np.array(action[k])
-                    actions[agent_id] = action
-                except:
-                    if self.cfg.verbosity > 0:
-                        if action is None:
-                            print(f"{agent_id} sent a invalid action {action}. Agent likely errored out somewhere, check above for stderr logs")
-                        else:
-                            print(f"{agent_id} sent a invalid action {action}")
-                    actions[agent_id] = None
 
-            new_state_obs, rewards, dones, infos = self.env.step(actions)
-            # change_obs = self.env.state.get_change_obs(state_obs)
-            # state_obs = new_state_obs["player_0"]
-            # obs = to_json(change_obs)
-            obs = to_json(new_state_obs)
+            max_steps_this_iteration = max(self.env.speeds)
+            curr_step = 0
+            print(max_steps_this_iteration)
+            while (curr_step < max_steps_this_iteration):
+                # print("===", self.env.env_steps)
+                actions = dict()
+                
+                agent_ids = []
+                action_coros = []
+                for player in players.values():
+                    action = player.step(obs, self.env.env_steps, rewards[agent], infos[agent])
+                    action_coros += [action]
+                    agent_ids += [player.agent]
+                resolved_actions = await asyncio.gather(*action_coros)
+                for agent_id, action in zip(agent_ids, resolved_actions):
+                    try:
+                        for k in action:
+                            if type(action[k]) == list:
+                                action[k] = np.array(action[k])
+                        actions[agent_id] = action
+                    except:
+                        if self.cfg.verbosity > 0:
+                            if action is None:
+                                print(f"{agent_id} sent a invalid action {action}. Agent likely errored out somewhere, check above for stderr logs")
+                            else:
+                                print(f"{agent_id} sent a invalid action {action}")
+                        actions[agent_id] = None
 
-            if save_replay:
-                # replay['observations'].append(self.env.render(mode='rgb_array'))
-                replay['observations'].append(self.env.render(mode='human'))
-                # replay["observations"].append(obs)
-                replay["actions"].append(actions)
-                replay["rewards"].append(rewards)
-                replay["dones"].append(dones)
+                new_state_obs, rewards, dones, infos = self.env.step(actions)
+                # change_obs = self.env.state.get_change_obs(state_obs)
+                # state_obs = new_state_obs["player_0"]
+                # obs = to_json(change_obs)
+                obs = to_json(new_state_obs)
 
-            if self.cfg.render: 
-                self.env.render(mode='human')
-                time.sleep(0.1)
-            players_left = len(dones)
-            for k in dones:
-                if dones[k]: players_left -= 1
-            if players_left < len(self.cfg.players):
-                game_done = True
+                if save_replay:
+                    # replay['observations'].append(self.env.render(mode='rgb_array'))
+                    replay['observations'].append(self.env.render(mode='human'))
+                    # replay["observations"].append(obs)
+                    replay["actions"].append(actions)
+                    replay["rewards"].append(rewards)
+                    replay["dones"].append(dones)
+
+                if self.cfg.render: 
+                    self.env.render(mode='human')
+                    time.sleep(0.1)
+                players_left = len(dones)
+                for k in dones:
+                    if dones[k]: players_left -= 1
+                if players_left < len(self.cfg.players):
+                    game_done = True
+
+                curr_step += 1
+
+            self.env._update_env()
         self.log.info(f"Final Scores: {rewards}")
         if save_replay:
             self.save_replay(replay)
