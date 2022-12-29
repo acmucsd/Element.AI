@@ -14,6 +14,7 @@ from arcade import color
 from .config import EnvConfig
 from .player import Player
 from .constants import *
+from .visualizer import Visualizer
 
 ObsType = TypeVar("ObsType")
 ActionType = TypeVar("ActionType")
@@ -57,6 +58,8 @@ class PaperIO(ParallelEnv):
         self.max_episode_length = self.env_cfg.max_episode_length
 
         self.setup()
+
+        self.py_visualizer: Visualizer = None
 
     def setup(self):
 
@@ -346,45 +349,57 @@ class PaperIO(ParallelEnv):
     # make mode='rgb_array' more efficient
     # add mode='human' support (pygame -- see luxai2022 comp for an example)
     # NOTE: for pygame will need to implement close() method below
+    def _init_render(self):
+        if self.py_visualizer is None:
+            self.py_visualizer = Visualizer(self.env_cfg.map_size)
+            return True
+        return False
+
     def render(self, mode='rgb_array'):
-        if (mode == 'human'):
-            raise NotImplementedError
-        elif (mode == 'rgb_array'):
-            self.player_colors = [
+        self.player_colors = [
                 (np.array(color.YELLOW_ORANGE, dtype=np.uint8), np.array(color.SAPPHIRE_BLUE, dtype=np.uint8)),
                 (np.array(color.HOT_PINK, dtype=np.uint8), np.array(color.SAP_GREEN, dtype=np.uint8)),
                 (np.array(color.RED_ORANGE, dtype=np.uint8), np.array(color.TEAL, dtype=np.uint8)),
                 (np.array(color.GOLD, dtype=np.uint8), np.array(color.PURPLE_HEART, dtype=np.uint8)),
             ]
 
-            WHITE_SMOKE = np.array(color.WHITE_SMOKE)
-            BLACK = np.array(color.BLACK)
-            PURPLE = np.array(color.PURPLE)
+        WHITE_SMOKE = np.array(color.WHITE_SMOKE)
+        BLACK = np.array(color.BLACK)
+        PURPLE = np.array(color.PURPLE)
 
-            map_size = self.env_cfg.map_size
-            rgb_array = np.zeros((map_size, map_size, 3), dtype=np.uint8)
+        map_size = self.env_cfg.map_size
+        rgb_array = np.zeros((map_size, map_size, 3), dtype=np.uint8)
 
-            for r in range(map_size):
-                for c in range(map_size):
-                    if self.grid[r][c] == UNOCCUPIED:
-                        rgb_array[r][c] = WHITE_SMOKE
-                    elif self.grid[r][c] == BOMB:
-                        rgb_array[r][c] = BLACK
-                    elif self.grid[r][c] == BOOST:
-                        rgb_array[r][c] = PURPLE
-                    elif self.grid[r][c] == PASSED:
-                        rgb_array[r][c] = self.player_colors[self.player_num_grid[r][c]][0]
-                    elif self.grid[r][c] == OCCUPIED:
-                        rgb_array[r][c] = self.player_colors[self.player_num_grid[r][c]][1]
-                    else:
-                        raise Exception("Unknown grid value")
+        for r in range(map_size):
+            for c in range(map_size):
+                if self.grid[r][c] == UNOCCUPIED:
+                    rgb_array[r][c] = WHITE_SMOKE
+                elif self.grid[r][c] == BOMB:
+                    rgb_array[r][c] = BLACK
+                elif self.grid[r][c] == BOOST:
+                    rgb_array[r][c] = PURPLE
+                elif self.grid[r][c] == PASSED:
+                    rgb_array[r][c] = self.player_colors[self.player_num_grid[r][c]][0]
+                elif self.grid[r][c] == OCCUPIED:
+                    rgb_array[r][c] = self.player_colors[self.player_num_grid[r][c]][1]
+                else:
+                    raise Exception("Unknown grid value")
+
+        if (mode == 'human'):
+            if self._init_render():
+                self.py_visualizer.init_window()
+            self.py_visualizer.render(rgb_array)
+
+        elif (mode == 'rgb_array'):
 
             return rgb_array
 
     # NOTE: only necessary if we implement pygame for render(mode='human')
-    # def close(self):
-    #     """Closes the rendering window."""
-    #     pass
+    def close(self):
+        """Closes the rendering window."""
+        import pygame
+        pygame.display.quit()
+        pygame.quit()
 
     # NOTE: seems redundant, all necessary board info already given to agent in observe()
     # def state(self) -> np.ndarray:
