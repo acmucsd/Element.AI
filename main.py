@@ -33,7 +33,7 @@ def main():
 
     # env configs
 
-    # parser.add_argument("--render", help="Render with a window", action="store_true", default=False)
+    parser.add_argument("--render", help="Render with a window", action="store_true", default=False)
 
     # parser.add_argument("--tournament", help="Turn tournament mode on", action="store_true", default=False)
     # parser.add_argument("--tournament_cfg.concurrent", help="Max concurrent number of episodes to run. Recommended to set no higher than the number of CPUs / 2", type=int, default=1)
@@ -61,7 +61,7 @@ def main():
                 save_format=getattr(args, "replay.save_format"),
                 # compressed_obs=getattr(args, "replay.compressed_obs")
             ),
-            # render=args.render
+            render=args.render
         )
 
     import time

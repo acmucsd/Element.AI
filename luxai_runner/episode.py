@@ -78,7 +78,7 @@ class Episode:
         obs = to_json(state_obs)
 
         if self.cfg.render: 
-            self.env.render()
+            self.env.render(mode='human')
             time.sleep(0.2)
         game_done = False
         rewards, dones, infos = dict(), dict(), dict()
@@ -138,7 +138,7 @@ class Episode:
                 replay["dones"].append(dones)
 
             if self.cfg.render: 
-                self.env.render()
+                self.env.render(mode='human')
                 time.sleep(0.1)
             players_left = len(dones)
             for k in dones:
