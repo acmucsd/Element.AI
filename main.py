@@ -13,11 +13,9 @@ from luxai_runner.logger import Logger
 
 from paperio import PaperIO
 
-SEED = 0 
+SEED = 0
 
 def main():
-    np.random.seed(SEED)
-    random.seed(SEED)
     import argparse
 
     parser = argparse.ArgumentParser(description="Run the LuxAI 2022 game.")
@@ -65,7 +63,8 @@ def main():
                 save_format=getattr(args, "replay.save_format"),
                 # compressed_obs=getattr(args, "replay.compressed_obs")
             ),
-            render=args.render
+            render=args.render,
+            seed = SEED,
         )
 
     import time

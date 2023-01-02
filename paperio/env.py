@@ -57,8 +57,6 @@ class PaperIO(ParallelEnv):
 
         self.max_episode_length = self.env_cfg.max_episode_length
 
-        self.setup()
-
         self.py_visualizer: Visualizer = None
 
     def setup(self):
@@ -100,9 +98,6 @@ class PaperIO(ParallelEnv):
     # TODO: Medium Priority
     # seed-based bomb and boost placement (deterministic env)
     # will also need to handle seed being passed from reset() func
-    # TODO: Medium Priority
-    # Smarter boost and bomb placement
-    # Essentially tweak algo to have ideal # of bombs and boosts in good locations
     def place_boost_bomb(self, rate = 1.0):
 
         map_size = self.env_cfg.map_size
@@ -111,20 +106,29 @@ class PaperIO(ParallelEnv):
 
         # place boosts
         while (boost_count>0):
-            x = random.randrange(0, map_size)
-            y = random.randrange(0, map_size)
-            if(self.grid[x][y]==0 and (x-1 >= 0 and (x-1, y) not in self.starting_coords)):
+            empty = np.where(self.grid == UNOCCUPIED)
+            if len(empty[0])==0:
+                return
+            choice = random.randrange(0, len(empty[0]))
+            x,y = empty[0][choice], empty[1][choice]
+            if (x-1 >= 0 and (x-1, y) in self.starting_coords):
+                boost_count-=1
+            elif(self.grid[x][y]==UNOCCUPIED):
                 self.grid[x][y]= BOOST
                 boost_count-=1
-
+            
         # place bombs
         while (bomb_count>0):
-            x = random.randrange(0, map_size)
-            y = random.randrange(0, map_size)
-            if(self.grid[x][y]==0 and (x-1 >= 0 and (x-1, y) not in self.starting_coords)):
+            empty = np.where(self.grid == UNOCCUPIED)
+            if len(empty[0])==0:
+                return
+            choice = random.randrange(0, len(empty[0]))
+            x,y = empty[0][choice], empty[1][choice]
+            if (x-1 >= 0 and (x-1, y) in self.starting_coords):
+                bomb_count-=1
+            elif(self.grid[x][y]==UNOCCUPIED):
                 self.grid[x][y]= BOMB
                 bomb_count-=1
-
 
     """
     Space Functions
@@ -356,18 +360,20 @@ class PaperIO(ParallelEnv):
         return_info: bool = False,
         options: Optional[dict] = None,
     ) -> ObsDict:
+        if seed is not None:
+            self._seed_run(seed)
         self.setup()
 
         return self.observe()
     
 
     # NOTE: seed will be useful only when we implement seed-based bomb/boost placement
-    # def seed(self, seed=None):
-    #     """Reseeds the environment (making the resulting environment deterministic)."""
-    #     raise NotImplementedError(
-    #         "Calling seed externally is deprecated; call reset(seed=seed) instead"
-    #     )
-
+    def _seed_run(self, seed=None):
+        """Reseeds the environment (making the resulting environment deterministic)."""
+        np.random.seed(seed)
+        random.seed(seed)
+        
+        
     # TODO: high priority
     # make mode='rgb_array' more efficient
     # add mode='human' support (pygame -- see luxai2022 comp for an example)
