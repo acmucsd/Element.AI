@@ -103,17 +103,17 @@ class PaperIO(ParallelEnv):
     # TODO: Medium Priority
     # Smarter boost and bomb placement
     # Essentially tweak algo to have ideal # of bombs and boosts in good locations
-    def place_boost_bomb(self):
+    def place_boost_bomb(self, rate = 1.0):
 
         map_size = self.env_cfg.map_size
-        boost_count = self.env_cfg.boost_count
-        bomb_count = self.env_cfg.bomb_count
+        boost_count = int(self.env_cfg.boost_count * rate)
+        bomb_count = int(self.env_cfg.bomb_count * rate)
 
         # place boosts
         while (boost_count>0):
             x = random.randrange(0, map_size)
             y = random.randrange(0, map_size)
-            if(self.grid[x][y]==0):
+            if(self.grid[x][y]==0 and (x-1 >= 0 and (x-1, y) not in self.starting_coords)):
                 self.grid[x][y]= BOOST
                 boost_count-=1
 
@@ -121,7 +121,7 @@ class PaperIO(ParallelEnv):
         while (bomb_count>0):
             x = random.randrange(0, map_size)
             y = random.randrange(0, map_size)
-            if(self.grid[x][y]==0):
+            if(self.grid[x][y]==0 and (x-1 >= 0 and (x-1, y) not in self.starting_coords)):
                 self.grid[x][y]= BOMB
                 bomb_count-=1
 
@@ -185,6 +185,7 @@ class PaperIO(ParallelEnv):
     def _update_env(self):
         self.update_speeds()
         self.env_steps += 1
+        self.place_boost_bomb(rate = 0.1)
 
     def step(self, actions: ActionDict):
         """Receives a dictionary of actions keyed by the agent name.

@@ -3,6 +3,7 @@ from typing import Dict, List
 import numpy as np
 import json
 import sys
+import random
 # from omegaconf import OmegaConf
 
 from luxai_runner.bot import Bot
@@ -12,8 +13,11 @@ from luxai_runner.logger import Logger
 
 from paperio import PaperIO
 
+SEED = 0 
+
 def main():
-    np.random.seed(0)
+    np.random.seed(SEED)
+    random.seed(SEED)
     import argparse
 
     parser = argparse.ArgumentParser(description="Run the LuxAI 2022 game.")

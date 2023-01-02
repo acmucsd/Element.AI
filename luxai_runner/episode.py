@@ -102,7 +102,7 @@ class Episode:
 
             max_steps_this_iteration = max(self.env.speeds)
             curr_step = 0
-            print(max_steps_this_iteration)
+            # print(max_steps_this_iteration)
             while (curr_step < max_steps_this_iteration):
                 # print("===", self.env.env_steps)
                 actions = dict()
