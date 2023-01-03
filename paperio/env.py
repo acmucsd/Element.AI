@@ -81,18 +81,33 @@ class PaperIO(ParallelEnv):
             start_x, start_y = self.starting_coords[player_num]
             player = Player(start_x, start_y, player_num)
             self.player_dict[self.agents[player_num]] = player
-            c, r = player.pos
-            for cc in range(c-1, c + 2):
-                for rr in range(r-1, r + 2):
-                    self.grid[rr][cc] = OCCUPIED
-                    self.player_grid[rr][cc] = player
-                    self.player_num_grid[rr][cc] = player.num
-                    player.push_zone((rr, cc))
+            self._spawn_player(player)
 
         self.energies = [0] * self.num_agents
         self.speeds = [1] * self.num_agents
 
         self.place_boost_bomb()
+
+    def _spawn_player(self, player: Player, respawn=False):
+
+        if (respawn):
+            empty = np.where(self.grid == UNOCCUPIED)
+            if (len(empty[0]) == 0):
+                player.dead = True
+                return
+            
+            choice = random.randrange(0, len(empty[0]))
+            player.pos = (empty[0][choice], empty[1][choice])
+        
+        padding = 0 if respawn else 1
+
+        c, r = player.pos
+        for cc in range(c - padding, c + padding + 1):
+            for rr in range(r - padding, r + padding + 1):
+                self.grid[rr][cc] = OCCUPIED
+                self.player_grid[rr][cc] = player
+                self.player_num_grid[rr][cc] = player.num
+                player.push_zone((rr, cc))
 
 
     # TODO: Medium Priority
@@ -107,7 +122,7 @@ class PaperIO(ParallelEnv):
         # place boosts
         while (boost_count>0):
             empty = np.where(self.grid == UNOCCUPIED)
-            if len(empty[0])==0:
+            if (len(empty[0])==0):
                 return
             choice = random.randrange(0, len(empty[0]))
             x,y = empty[0][choice], empty[1][choice]
@@ -120,7 +135,7 @@ class PaperIO(ParallelEnv):
         # place bombs
         while (bomb_count>0):
             empty = np.where(self.grid == UNOCCUPIED)
-            if len(empty[0])==0:
+            if (len(empty[0])==0):
                 return
             choice = random.randrange(0, len(empty[0]))
             x,y = empty[0][choice], empty[1][choice]
@@ -191,6 +206,12 @@ class PaperIO(ParallelEnv):
         self.env_steps += 1
         self.place_boost_bomb(rate = 0.1)
 
+        for player_num in range(self.num_agents):
+            player: Player = self.player_dict[self.agents[player_num]]
+            if (player.reset and not player.dead):
+                self._spawn_player(player, respawn=True)
+                player.reset = False
+
     def step(self, actions: ActionDict):
         """Receives a dictionary of actions keyed by the agent name.
 
@@ -211,6 +232,9 @@ class PaperIO(ParallelEnv):
                 player.update(turn)
                 players_moving.append(player)
 
+        for player_name in self.agents:
+            player = self.player_dict[player_name]
+
         # TODO: Low priority
         # Note that much of the code below is checking edge cases that only arose in GridEnvV1
         # due to the clock-based system used in arcade
@@ -220,7 +244,7 @@ class PaperIO(ParallelEnv):
         for x in players_moving:
             player: Player = x
 
-            if (player.reset):
+            if (player.reset or player.dead):
                 continue
             else:
                 c, r = player.pos
@@ -293,8 +317,9 @@ class PaperIO(ParallelEnv):
             # TODO: High priority
             # Implement rewards and infos discts
             # NOTE: dones is false until hit max_episode_length
+            # or until the player is dead (i.e. board full, can't respawn)
             rewards[agent] = len(player.zone)
-            dones[agent] = env_done
+            dones[agent] = env_done or player.dead
             infos[agent] = None
 
         observations['board'] = {

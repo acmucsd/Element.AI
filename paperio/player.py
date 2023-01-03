@@ -8,6 +8,7 @@ class Player:
 
         self.num = player_num
         self.moves_left = 1
+        self.dead = False
 
         """ Player Movement Location """
         self.direction = 0 #random.randrange(0,4) # pick a random starting direction
