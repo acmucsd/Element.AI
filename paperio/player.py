@@ -8,6 +8,7 @@ class Player:
 
         self.num = player_num
         self.moves_left = 1
+        self.respawning = False
         self.dead = False
 
         """ Player Movement Location """

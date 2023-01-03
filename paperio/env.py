@@ -208,11 +208,12 @@ class PaperIO(ParallelEnv):
 
         for player_num in range(self.num_agents):
             player: Player = self.player_dict[self.agents[player_num]]
-            if (player.reset and not player.dead):
+            if (player.respawning and not player.dead):
                 self._spawn_player(player, respawn=True)
                 player.reset = False
+                player.respawning = False
 
-    def step(self, actions: ActionDict):
+    def step(self, actions: ActionDict, step_num):
         """Receives a dictionary of actions keyed by the agent name.
 
         Returns the observation dictionary, reward dictionary, terminated dictionary, truncated dictionary
@@ -224,16 +225,15 @@ class PaperIO(ParallelEnv):
             action = actions[agent]
             player: Player = self.player_dict[agent] 
 
-            action_allowed = (not player.reset) and (action != None)
+            if (self.speeds[player.num] > step_num):
 
-            if (action_allowed):
-                turn = action['turn']
+                turn = 0
+
+                if (action != None):
+                    turn = action['turn']
 
                 player.update(turn)
                 players_moving.append(player)
-
-        for player_name in self.agents:
-            player = self.player_dict[player_name]
 
         # TODO: Low priority
         # Note that much of the code below is checking edge cases that only arose in GridEnvV1
@@ -245,6 +245,7 @@ class PaperIO(ParallelEnv):
             player: Player = x
 
             if (player.reset or player.dead):
+                player.respawning = True
                 continue
             else:
                 c, r = player.pos
@@ -278,7 +279,7 @@ class PaperIO(ParallelEnv):
                         player.last_unoccupied = True
                     elif player_cell == BOMB:
                         self.reset_player(player)
-                        self.grid[r][c] = PASSED
+                        self.grid[r][c] = UNOCCUPIED
                         self.player_grid[r][c] = player
                         self.player_num_grid[r][c] = player.num
                     elif player_cell == BOOST:

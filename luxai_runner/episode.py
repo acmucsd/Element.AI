@@ -128,7 +128,7 @@ class Episode:
                                 print(f"{agent_id} sent a invalid action {action}")
                         actions[agent_id] = None
 
-                new_state_obs, rewards, dones, infos = self.env.step(actions)
+                new_state_obs, rewards, dones, infos = self.env.step(actions, curr_step)
                 # change_obs = self.env.state.get_change_obs(state_obs)
                 # state_obs = new_state_obs["player_0"]
                 # obs = to_json(change_obs)
