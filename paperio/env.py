@@ -339,10 +339,6 @@ class PaperIO(ParallelEnv):
 
         return observations, rewards, dones, infos
         
-
-    # TODO: High Priority
-    # Have game run continuously and only end when hit max_iterations
-    # This includes respawn functionality
     def reset_player(self, player: Player):
         indices = np.where(self.player_num_grid == player.num)
 
@@ -387,7 +383,6 @@ class PaperIO(ParallelEnv):
                     self.player_grid[r][c] = None
                     self.player_num_grid[r][c] = -1
 
-    # NOTE will need to handle seed stuff when that's implemented
     def reset(
         self,
         seed: Optional[int] = None,
@@ -401,7 +396,6 @@ class PaperIO(ParallelEnv):
         return self.observe()
     
 
-    # NOTE: seed will be useful only when we implement seed-based bomb/boost placement
     def _seed_run(self, seed=None):
         """Reseeds the environment (making the resulting environment deterministic)."""
         np.random.seed(seed)
@@ -411,7 +405,6 @@ class PaperIO(ParallelEnv):
     # TODO: high priority
     # make mode='rgb_array' more efficient
     # add mode='human' support (pygame -- see luxai2022 comp for an example)
-    # NOTE: for pygame will need to implement close() method below
     def _init_render(self):
         if self.py_visualizer is None:
             self.py_visualizer = Visualizer(self.env_cfg.map_size)
@@ -454,10 +447,8 @@ class PaperIO(ParallelEnv):
             self.py_visualizer.render(rgb_array)
 
         elif (mode == 'rgb_array'):
-
             return rgb_array
 
-    # NOTE: only necessary if we implement pygame for render(mode='human')
     def close(self):
         """Closes the rendering window."""
         import pygame
