@@ -278,11 +278,19 @@ class PaperIO(ParallelEnv):
                         player.push_path((c,r))
                         player.last_unoccupied = True
                     elif player_cell == BOMB:
+                        owned_by_num = self.player_num_grid[r][c]
+
+                        if (owned_by_num != player.num):
+                            self.grid[r][c] = OCCUPIED
+
                         self.reset_player(player)
-                        self.grid[r][c] = UNOCCUPIED
-                        self.player_grid[r][c] = player
-                        self.player_num_grid[r][c] = player.num
                     elif player_cell == BOOST:
+                        owned_by_num = self.player_num_grid[r][c]
+
+                        if (owned_by_num != player.num):
+                            owned_by: Player = self.player_dict[self.agents[owned_by_num]]
+                            owned_by.pop_zone((r,c))
+
                         self.grid[r][c] = PASSED
                         self.player_grid[r][c] = player
                         self.player_num_grid[r][c] = player.num
@@ -350,7 +358,7 @@ class PaperIO(ParallelEnv):
 
         player.reset_player()
 
-    def update_occupancy(self, player):
+    def update_occupancy(self, player: Player):
 
         map_size = self.env_cfg.map_size
 
