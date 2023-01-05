@@ -75,7 +75,7 @@ class PaperIO(ParallelEnv):
         self.player_dict = dict()
         self.grid = np.zeros((map_size, map_size), dtype=np.uint8)
         self.player_grid = np.full((map_size, map_size), None)
-        self.player_num_grid = np.full((map_size, map_size), -1, dtype=np.uint8)
+        self.player_num_grid = np.full((map_size, map_size), -1, dtype=np.int8)
         
         for player_num in range(self.num_agents):
             start_x, start_y = self.starting_coords[player_num]
@@ -280,14 +280,16 @@ class PaperIO(ParallelEnv):
                     elif player_cell == BOMB:
                         owned_by_num = self.player_num_grid[r][c]
 
-                        if (owned_by_num != player.num):
+                        if (owned_by_num == -1):
+                            self.grid[r][c] = UNOCCUPIED
+                        elif (owned_by_num != player.num):
                             self.grid[r][c] = OCCUPIED
 
                         self.reset_player(player)
                     elif player_cell == BOOST:
                         owned_by_num = self.player_num_grid[r][c]
 
-                        if (owned_by_num != player.num):
+                        if (owned_by_num != player.num and owned_by_num != -1):
                             owned_by: Player = self.player_dict[self.agents[owned_by_num]]
                             owned_by.pop_zone((r,c))
 
