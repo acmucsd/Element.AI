@@ -121,27 +121,27 @@ class PaperIO(ParallelEnv):
 
         # place boosts
         while (boost_count>0):
-            empty = np.where(self.grid == UNOCCUPIED)
+            empty = np.where(np.logical_or(self.grid == UNOCCUPIED, self.grid == OCCUPIED))
             if (len(empty[0])==0):
                 return
             choice = random.randrange(0, len(empty[0]))
             x,y = empty[0][choice], empty[1][choice]
             if (x-1 >= 0 and (x-1, y) in self.starting_coords):
                 boost_count-=1
-            elif(self.grid[x][y]==UNOCCUPIED):
+            else:
                 self.grid[x][y]= BOOST
                 boost_count-=1
             
         # place bombs
         while (bomb_count>0):
-            empty = np.where(self.grid == UNOCCUPIED)
+            empty = np.where(np.logical_or(self.grid == UNOCCUPIED, self.grid == OCCUPIED))
             if (len(empty[0])==0):
                 return
             choice = random.randrange(0, len(empty[0]))
             x,y = empty[0][choice], empty[1][choice]
             if (x-1 >= 0 and (x-1, y) in self.starting_coords):
                 bomb_count-=1
-            elif(self.grid[x][y]==UNOCCUPIED):
+            else:
                 self.grid[x][y]= BOMB
                 bomb_count-=1
 

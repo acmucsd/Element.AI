@@ -13,8 +13,6 @@ from luxai_runner.logger import Logger
 
 from paperio import PaperIO
 
-SEED = 0
-
 def main():
     import argparse
 
@@ -31,7 +29,7 @@ def main():
     parser.add_argument(
         "-v", "--verbose", help="Verbose Level (0 = silent, 1 = errors, 2 = warnings, 3 = info)", type=int, default=1
     )
-    # parser.add_argument("-s", "--seed", help="Fix a seed for episode(s). All episodes will initialize the same.", type=int)
+    parser.add_argument("-s", "--seed", help="Fix a seed for episode(s). All episodes will initialize the same.", type=int)
 
     # env configs
 
@@ -49,7 +47,7 @@ def main():
             players=args.players,
             num_players = len(args.players),
             env_cls=PaperIO,
-            # seed=args.seed,
+            seed=args.seed,
             env_cfg=dict(
                 num_players=len(args.players),
                 # verbose=args.verbose,
@@ -64,7 +62,6 @@ def main():
                 # compressed_obs=getattr(args, "replay.compressed_obs")
             ),
             render=args.render,
-            seed = SEED,
         )
 
     import time
