@@ -94,7 +94,7 @@ class Episode:
             replay = dict(observations=[], actions=[], dones=[], rewards=[])
             # replay["observations"].append(state_obs)
             # replay['observations'].append(self.env.render(mode='rgb_array'))
-            replay['observations'].append(self.env.render(mode='rgb_array'))
+            replay['observations'].append(self.env.render(mode='rgb_array', skip_update=self.cfg.render))
 
         i = 0
         while not game_done:
