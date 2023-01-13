@@ -414,42 +414,17 @@ class PaperIO(ParallelEnv):
         return False
 
     def render(self, mode='rgb_array'):
-        self.player_colors = [
-                (np.array(color.YELLOW_ORANGE, dtype=np.uint8), np.array(color.SAPPHIRE_BLUE, dtype=np.uint8)),
-                (np.array(color.HOT_PINK, dtype=np.uint8), np.array(color.SAP_GREEN, dtype=np.uint8)),
-                (np.array(color.RED_ORANGE, dtype=np.uint8), np.array(color.TEAL, dtype=np.uint8)),
-                (np.array(color.GOLD, dtype=np.uint8), np.array(color.PURPLE_HEART, dtype=np.uint8)),
-            ]
-
-        WHITE_SMOKE = np.array(color.WHITE_SMOKE)
-        BLACK = np.array(color.BLACK)
-        PURPLE = np.array(color.PURPLE)
-
-        map_size = self.env_cfg.map_size
-        rgb_array = np.zeros((map_size, map_size, 3), dtype=np.uint8)
-
-        for r in range(map_size):
-            for c in range(map_size):
-                if self.grid[r][c] == UNOCCUPIED:
-                    rgb_array[r][c] = WHITE_SMOKE
-                elif self.grid[r][c] == BOMB:
-                    rgb_array[r][c] = BLACK
-                elif self.grid[r][c] == BOOST:
-                    rgb_array[r][c] = PURPLE
-                elif self.grid[r][c] == PASSED:
-                    rgb_array[r][c] = self.player_colors[self.player_num_grid[r][c]][0]
-                elif self.grid[r][c] == OCCUPIED:
-                    rgb_array[r][c] = self.player_colors[self.player_num_grid[r][c]][1]
-                else:
-                    raise Exception("Unknown grid value")
 
         if (mode == 'human'):
             if self._init_render():
                 self.py_visualizer.init_window()
-            self.py_visualizer.render(rgb_array)
+
+            self.py_visualizer.update_scene(self.grid, self.player_num_grid)
+            self.py_visualizer.render()
+        
 
         elif (mode == 'rgb_array'):
-            return rgb_array
+            return self.py_visualizer.update_scene(self.grid,self.player_num_grid)
 
     def close(self):
         """Closes the rendering window."""
