@@ -143,7 +143,7 @@ class Episode:
                     replay["dones"].append(dones)
 
                 if self.cfg.render: 
-                    self.env.render(mode='human')
+                    self.env.render(mode='human', skip_update=save_replay)
                     time.sleep(0.1)
                 players_left = len(dones)
                 for k in dones:
