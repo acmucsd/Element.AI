@@ -229,8 +229,9 @@ class PaperIO(ParallelEnv):
 
                 turn = 0
 
-                if (action != None):
-                    turn = action['turn']
+                attempted_action = action['turn']
+                if (attempted_action in VALID_MOVES):
+                    turn = attempted_action
 
                 player.update(turn)
                 players_moving.append(player)
@@ -353,6 +354,7 @@ class PaperIO(ParallelEnv):
 
         self.energies[player.num] = 0
         player.moves_left = 0
+        player.pos = (-1, -1)
 
         player.reset_player()
 
