@@ -158,6 +158,8 @@ class PaperIO(ParallelEnv):
             direction=spaces.Box(low=-1, high=1, shape=(2,), dtype=int),
             resetting=spaces.Box(low=0, high=1, dtype=bool),
             head=spaces.Box(low=0, high=self.env_cfg.map_size, dtype=int),
+            energy=spaces.Box(low=0, high=1000, dtype=int),
+            speed=spaces.Box(low=1, high=5, dtype=int)
             # TODO: High Priority
             # figure out implementation of the below items
             # "tail": player.path,
@@ -321,6 +323,8 @@ class PaperIO(ParallelEnv):
                 'direction': DIRECTIONS[player.direction],
                 'resetting': player.reset,
                 'head': player.pos,
+                'energy': self.energies[player.num],
+                'speed': self.speeds[player.num],
                 # NOTE: see observation_space function
                 # "tail": player.path,
                 # "zone": player.zone,
@@ -353,7 +357,6 @@ class PaperIO(ParallelEnv):
             self.player_num_grid[x][y] = -1
 
         self.energies[player.num] = 0
-        player.moves_left = 0
         player.pos = (-1, -1)
 
         player.reset_player()
