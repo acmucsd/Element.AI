@@ -72,7 +72,7 @@ class Episode:
         await asyncio.wait(start_tasks, return_when=asyncio.ALL_COMPLETED)
 
         
-        obs = self.env.reset(seed=self.seed)
+        obs, rewards, dones, infos = self.env.reset(seed=self.seed)
         env_cfg = self.env.env_cfg
         state_obs = obs #self.env.state.get_compressed_obs()
         obs = to_json(state_obs)
