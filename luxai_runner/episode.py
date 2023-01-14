@@ -110,7 +110,7 @@ class Episode:
                 agent_ids = []
                 action_coros = []
                 for player in players.values():
-                    action = player.step(obs, self.env.env_steps, rewards[agent], infos[agent])
+                    action = player.step(obs, self.env.env_steps, curr_step, rewards[agent], infos[agent])
                     action_coros += [action]
                     agent_ids += [player.agent]
                 resolved_actions = await asyncio.gather(*action_coros)
