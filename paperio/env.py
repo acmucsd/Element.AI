@@ -422,16 +422,14 @@ class PaperIO(ParallelEnv):
         if (mode == 'human'):
             if self._init_render():
                 self.py_visualizer.init_window()
-
             if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid)
             self.py_visualizer.render()
         
 
         elif (mode == 'rgb_array'):
-            if (skip_update):
-                return self.py_visualizer.rgb_array
-            else:
-                return self.py_visualizer.update_scene(self.grid,self.player_num_grid)
+            self._init_render()
+            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid)
+            return self.py_visualizer.rgb_array
 
     def close(self):
         """Closes the rendering window."""

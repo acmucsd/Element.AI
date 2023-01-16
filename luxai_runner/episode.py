@@ -134,17 +134,16 @@ class Episode:
                 # obs = to_json(change_obs)
                 obs = to_json((new_state_obs, rewards, dones, infos))
 
+                if self.cfg.render: 
+                    self.env.render(mode='human')
+                    time.sleep(0.1)
                 if save_replay:
                     # replay['observations'].append(self.env.render(mode='rgb_array'))
-                    replay['observations'].append(self.env.render(mode='rgb_array'))
+                    replay['observations'].append(self.env.render(mode='rgb_array', skip_update=self.cfg.render))
                     # replay["observations"].append(obs)
                     replay["actions"].append(actions)
                     replay["rewards"].append(rewards)
                     replay["dones"].append(dones)
-
-                if self.cfg.render: 
-                    self.env.render(mode='human', skip_update=save_replay)
-                    time.sleep(0.1)
                 players_left = len(dones)
                 for k in dones:
                     if dones[k]: players_left -= 1
