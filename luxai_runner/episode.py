@@ -75,7 +75,7 @@ class Episode:
         obs, rewards, dones, infos = self.env.reset(seed=self.seed)
         env_cfg = self.env.env_cfg
         state_obs = obs #self.env.state.get_compressed_obs()
-        obs = to_json(state_obs)
+        obs = to_json((state_obs, rewards, dones, infos))
 
         if self.cfg.render: 
             self.env.render(mode='human')
@@ -132,7 +132,7 @@ class Episode:
                 # change_obs = self.env.state.get_change_obs(state_obs)
                 # state_obs = new_state_obs["player_0"]
                 # obs = to_json(change_obs)
-                obs = to_json(new_state_obs)
+                obs = to_json((new_state_obs, rewards, dones, infos))
 
                 if save_replay:
                     # replay['observations'].append(self.env.render(mode='rgb_array'))

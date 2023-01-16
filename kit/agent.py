@@ -7,9 +7,9 @@ class Agent():
 
     def act(self, iter: int, curr_step: int, obs, remainingOverageTime: int = 60):
 
-        direction = iter % 3 - 1
+        obs, rewards, dones, infos = obs
 
-        print(iter, curr_step, file=sys.stderr)
+        direction = iter % 3 - 1
 
         action = {
             'turn': direction

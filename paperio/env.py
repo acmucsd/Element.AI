@@ -92,7 +92,7 @@ class PaperIO(ParallelEnv):
 
         if (respawn):
             empty = np.where(self.grid == UNOCCUPIED)
-            if (len(empty[0]) == 0):
+            if (len(empty) == 0):
                 player.dead = True
                 return
             
@@ -167,7 +167,6 @@ class PaperIO(ParallelEnv):
         )
 
         obs_space['board'] = spaces.Dict(
-            iteration=spaces.Discrete(self.env_cfg.max_episode_length),
             board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
             players_state=spaces.Box(low=-1, high=(self.num_agents-1), shape=self.player_num_grid.shape, dtype=self.player_num_grid.dtype),
         )
@@ -340,7 +339,6 @@ class PaperIO(ParallelEnv):
             infos[agent] = None
 
         observations['board'] = {
-            'iteration': self.env_steps,
             'board_state': self.grid,
             "players_state": self.player_num_grid,
         }
