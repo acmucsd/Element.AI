@@ -92,7 +92,7 @@ class PaperIO(ParallelEnv):
 
         if (respawn):
             empty = np.where(self.grid == UNOCCUPIED)
-            if (len(empty) == 0):
+            if (len(empty[0]) == 0):
                 player.dead = True
                 return
             
