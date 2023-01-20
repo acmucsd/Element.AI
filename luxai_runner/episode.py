@@ -72,10 +72,10 @@ class Episode:
         await asyncio.wait(start_tasks, return_when=asyncio.ALL_COMPLETED)
 
         
-        obs = self.env.reset(seed=self.seed)
+        obs, rewards, dones, infos = self.env.reset(seed=self.seed)
         env_cfg = self.env.env_cfg
         state_obs = obs #self.env.state.get_compressed_obs()
-        obs = to_json(state_obs)
+        obs = to_json((state_obs, rewards, dones, infos))
 
         if self.cfg.render: 
             self.env.render(mode='human')
@@ -110,7 +110,7 @@ class Episode:
                 agent_ids = []
                 action_coros = []
                 for player in players.values():
-                    action = player.step(obs, self.env.env_steps, rewards[agent], infos[agent])
+                    action = player.step(obs, self.env.env_steps, curr_step, rewards[agent], infos[agent])
                     action_coros += [action]
                     agent_ids += [player.agent]
                 resolved_actions = await asyncio.gather(*action_coros)
@@ -132,19 +132,18 @@ class Episode:
                 # change_obs = self.env.state.get_change_obs(state_obs)
                 # state_obs = new_state_obs["player_0"]
                 # obs = to_json(change_obs)
-                obs = to_json(new_state_obs)
+                obs = to_json((new_state_obs, rewards, dones, infos))
 
+                if self.cfg.render: 
+                    self.env.render(mode='human')
+                    time.sleep(0.1)
                 if save_replay:
                     # replay['observations'].append(self.env.render(mode='rgb_array'))
-                    replay['observations'].append(self.env.render(mode='rgb_array'))
+                    replay['observations'].append(self.env.render(mode='rgb_array', skip_update=self.cfg.render))
                     # replay["observations"].append(obs)
                     replay["actions"].append(actions)
                     replay["rewards"].append(rewards)
                     replay["dones"].append(dones)
-
-                if self.cfg.render: 
-                    self.env.render(mode='human', skip_update=save_replay)
-                    time.sleep(0.1)
                 players_left = len(dones)
                 for k in dones:
                     if dones[k]: players_left -= 1

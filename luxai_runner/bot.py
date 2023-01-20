@@ -36,10 +36,10 @@ class Bot:
 
         self.log = Logger(identifier=f"{self.agent}, {self.main_file_path}",verbosity=verbose)
 
-    async def step(self, obs, step: int, reward: float = 0, info=dict()):
+    async def step(self, obs, step: int, curr_step: int, reward: float = 0, info=dict()):
         stime = time.time()
         import copy
-        observations = copy.deepcopy(dict(obs=obs, step=step, remainingOverageTime=self.remainingOverageTime, player=self.agent, reward=float(reward), info=info))
+        observations = copy.deepcopy(dict(obs=obs, step=step, curr_step=curr_step, remainingOverageTime=self.remainingOverageTime, player=self.agent, reward=float(reward), info=info))
         stderr = None
         try:
             if self.direct_import_python_bots and self.command == "python":

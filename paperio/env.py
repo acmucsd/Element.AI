@@ -157,7 +157,9 @@ class PaperIO(ParallelEnv):
             player_num=spaces.Discrete(self.num_agents),
             direction=spaces.Box(low=-1, high=1, shape=(2,), dtype=int),
             resetting=spaces.Box(low=0, high=1, dtype=bool),
-            head=spaces.Box(low=0, high=self.env_cfg.map_size, dtype=int),
+            head=spaces.Box(low=-1, high=self.env_cfg.map_size, dtype=int),
+            energy=spaces.Box(low=0, high=1000, dtype=int),
+            speed=spaces.Box(low=1, high=5, dtype=int)
             # TODO: High Priority
             # figure out implementation of the below items
             # "tail": player.path,
@@ -165,7 +167,6 @@ class PaperIO(ParallelEnv):
         )
 
         obs_space['board'] = spaces.Dict(
-            iteration=spaces.Discrete(self.env_cfg.max_episode_length),
             board_state=spaces.Box(low=0, high=4, shape=self.grid.shape, dtype=self.grid.dtype),
             players_state=spaces.Box(low=-1, high=(self.num_agents-1), shape=self.player_num_grid.shape, dtype=self.player_num_grid.dtype),
         )
@@ -230,7 +231,9 @@ class PaperIO(ParallelEnv):
                 turn = 0
 
                 if (action != None):
-                    turn = action['turn']
+                    attempted_action = action['turn']
+                    if (attempted_action in VALID_MOVES):
+                        turn = attempted_action
 
                 player.update(turn)
                 players_moving.append(player)
@@ -317,9 +320,11 @@ class PaperIO(ParallelEnv):
 
             observations[agent] = {
                 'player_num': player.num,
-                'direction': DIRECTIONS[player.direction],
+                'direction': DIRECTIONS[player.direction] if not player.reset else (-1, -1),
                 'resetting': player.reset,
                 'head': player.pos,
+                'energy': self.energies[player.num],
+                'speed': self.speeds[player.num],
                 # NOTE: see observation_space function
                 # "tail": player.path,
                 # "zone": player.zone,
@@ -334,7 +339,6 @@ class PaperIO(ParallelEnv):
             infos[agent] = None
 
         observations['board'] = {
-            'iteration': self.env_steps,
             'board_state': self.grid,
             "players_state": self.player_num_grid,
         }
@@ -352,7 +356,7 @@ class PaperIO(ParallelEnv):
             self.player_num_grid[x][y] = -1
 
         self.energies[player.num] = 0
-        player.moves_left = 0
+        player.pos = (-1, -1)
 
         player.reset_player()
 
@@ -418,16 +422,14 @@ class PaperIO(ParallelEnv):
         if (mode == 'human'):
             if self._init_render():
                 self.py_visualizer.init_window()
-
             if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid)
             self.py_visualizer.render()
         
 
         elif (mode == 'rgb_array'):
-            if (skip_update):
-                return self.py_visualizer.rgb_array
-            else:
-                return self.py_visualizer.update_scene(self.grid,self.player_num_grid)
+            self._init_render()
+            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid)
+            return self.py_visualizer.rgb_array
 
     def close(self):
         """Closes the rendering window."""

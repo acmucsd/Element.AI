@@ -13,6 +13,7 @@ def agent_fn(observation):
     """
     global agent_dict
     step = observation.step
+    curr_step = observation.curr_step
     
     
     player = observation.player
@@ -26,7 +27,7 @@ def agent_fn(observation):
     agent_prev_obs[player] = obs
     agent.step = step
     
-    actions = agent.act(step, obs, remainingOverageTime)
+    actions = agent.act(step, curr_step, obs, remainingOverageTime)
 
     return process_action(actions)
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
         inputs = read_input()
         obs = json.loads(inputs)
         
-        observation = Namespace(**dict(step=obs["step"], obs=json.dumps(obs["obs"]), remainingOverageTime=obs["remainingOverageTime"], player=obs["player"], info=obs["info"]))
+        observation = Namespace(**dict(step=obs["step"], curr_step=obs['curr_step'], obs=json.dumps(obs["obs"]), remainingOverageTime=obs["remainingOverageTime"], player=obs["player"], info=obs["info"]))
         i += 1
         actions = agent_fn(observation)
         # send actions to engine

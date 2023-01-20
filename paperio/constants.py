@@ -1,5 +1,6 @@
 """ Agent Values """
 DIRECTIONS = ((0,1), (1,0), (0,-1), (-1,0))
+VALID_MOVES = (-1, 0, 1)
 
 """ Environment Values """
 ROW_COUNT = 80

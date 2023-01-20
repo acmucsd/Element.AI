@@ -65,6 +65,8 @@ class Visualizer:
     def update_scene(self, grid, player_num_grid):
         from arcade import color
 
+        self.rgb_array = np.zeros((self.map_size, self.map_size, 3), dtype=np.uint8)
+
         self.player_colors = [
                 (np.array(color.YELLOW_ORANGE, dtype=np.uint8), np.array(color.SAPPHIRE_BLUE, dtype=np.uint8)),
                 (np.array(color.HOT_PINK, dtype=np.uint8), np.array(color.SAP_GREEN, dtype=np.uint8)),
@@ -96,6 +98,7 @@ class Visualizer:
                     self.update_color(self.player_colors[player_num_grid[r][c]][1], r*self.tile_width, c*self.tile_width)
                 else:
                     raise Exception("Unknown grid value")
+
                 #r += self.tile_width
             #c += self.tile_width
             #np.vstack((self.rgb_array,row))
@@ -104,3 +107,4 @@ class Visualizer:
         return self.rgb_array
         # fStack = np.hstack((self.rgbarray,self.rgbarray,self.rgbarray,self.rgbarray))
         # return np.vstack((fStack, fStack, fStack, fStack))
+
