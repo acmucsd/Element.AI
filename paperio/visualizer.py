@@ -27,7 +27,7 @@ class Visualizer:
         resized = pygame.transform.scale(self.surf, self.screen.get_rect().size)
         self.screen.blit(resized, (0, 0))
 
-    def update_scene(self, grid, player_num_grid):
+    def update_scene(self, grid, player_num_grid, num_agents=0):
         from arcade import color
 
         self.rgb_array = np.zeros((self.map_size, self.map_size, 3), dtype=np.uint8)
@@ -43,17 +43,24 @@ class Visualizer:
         BLACK = np.array(color.BLACK)
         PURPLE = np.array(color.PURPLE)
 
-        for r in range(self.map_size):
-            for c in range(self.map_size):
-                if grid[r][c] == UNOCCUPIED:
-                    self.rgb_array[r][c] = WHITE_SMOKE
-                elif grid[r][c] == BOMB:
-                    self.rgb_array[r][c] = BLACK
-                elif grid[r][c] == BOOST:
-                    self.rgb_array[r][c] = PURPLE
-                elif grid[r][c] == PASSED:
-                    self.rgb_array[r][c] = self.player_colors[player_num_grid[r][c]][0]
-                elif grid[r][c] == OCCUPIED:
-                    self.rgb_array[r][c] = self.player_colors[player_num_grid[r][c]][1]
-                else:
-                    raise Exception("Unknown grid value")
+        for i in range(num_agents):
+            self.rgb_array[np.logical_and(grid == PASSED, player_num_grid == i)] = self.player_colors[i][0]
+            self.rgb_array[np.logical_and(grid == OCCUPIED, player_num_grid == i)] = self.player_colors[i][1]
+        self.rgb_array[grid == UNOCCUPIED] = WHITE_SMOKE
+        self.rgb_array[grid == BOMB] = BLACK
+        self.rgb_array[grid == BOOST] = PURPLE
+
+        # for r in range(self.map_size):
+        #     for c in range(self.map_size):
+        #         if grid[r][c] == UNOCCUPIED:
+        #             self.rgb_array[r][c] = WHITE_SMOKE
+        #         elif grid[r][c] == BOMB:
+        #             self.rgb_array[r][c] = BLACK
+        #         elif grid[r][c] == BOOST:
+        #             self.rgb_array[r][c] = PURPLE
+        #         elif grid[r][c] == PASSED:
+        #             self.rgb_array[r][c] = self.player_colors[player_num_grid[r][c]][0]
+        #         elif grid[r][c] == OCCUPIED:
+        #             self.rgb_array[r][c] = self.player_colors[player_num_grid[r][c]][1]
+        #         else:
+        #             raise Exception("Unknown grid value")
