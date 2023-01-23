@@ -40,6 +40,7 @@ class Visualizer:
         #smallbomb = self.rgbarray[::2.5, ::2.5]
         #(smallbomb, 'smallbomb')
 
+
     def init_window(self):
 
         pygame.init()
