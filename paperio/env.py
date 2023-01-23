@@ -73,7 +73,7 @@ class PaperIO(ParallelEnv):
         ]
 
         self.player_dict = dict()
-        self.grid = np.zeros((map_size, map_size), dtype=np.uint8)
+        self.grid = np.zeros((map_size, map_size), dtype=np.int8)
         self.player_grid = np.full((map_size, map_size), None)
         self.player_num_grid = np.full((map_size, map_size), -1, dtype=np.int8)
         
