@@ -213,6 +213,7 @@ class PaperIO(ParallelEnv):
                 self._spawn_player(player, respawn=True)
                 player.reset = False
                 player.respawning = False
+            player.score += len(player.zone)
 
     def step(self, actions: ActionDict, step_num):
         """Receives a dictionary of actions keyed by the agent name.
@@ -334,7 +335,7 @@ class PaperIO(ParallelEnv):
             # Implement rewards and infos discts
             # NOTE: dones is false until hit max_episode_length
             # or until the player is dead (i.e. board full, can't respawn)
-            rewards[agent] = len(player.zone)
+            rewards[agent] = player.score
             dones[agent] = env_done or player.dead
             infos[agent] = None
 

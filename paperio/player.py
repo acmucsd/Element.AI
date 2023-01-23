@@ -21,7 +21,7 @@ class Player:
         self.zone = set()
 
         """ Player Score """
-        self.score = -1
+        self.score = 0
 
     def update(self, turn):
 
