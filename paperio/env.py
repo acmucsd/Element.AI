@@ -236,7 +236,7 @@ class PaperIO(ParallelEnv):
                     if (attempted_action in VALID_MOVES):
                         turn = attempted_action
 
-                player.update(turn)
+                if (not (player.reset or player.dead)): player.update(turn)
                 players_moving.append(player)
 
         # TODO: Low priority
