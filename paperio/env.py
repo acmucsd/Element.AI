@@ -394,13 +394,13 @@ class PaperIO(ParallelEnv):
         grid_occupied_targ = np.logical_or(self.grid == UNOCCUPIED, grid_bomb_or_boost)
         grid_player_passed = np.logical_and(self.grid == PASSED, self.player_num_grid == player.num)
         enclosed = np.logical_or(grid_player_passed, grid_occupied_targ)
-        enclosed_occupied = np.logical_or(grid_player_passed, self.grid == UNOCCUPIED)
+        enclosed_unoccupied = np.logical_or(grid_player_passed, self.grid == UNOCCUPIED)
 
         free_tile = self.grid == TEMP
         free_bomb = self.grid == TEMP * BOMB
         free_boost = self.grid == TEMP * BOOST
 
-        self.grid[enclosed_occupied] = OCCUPIED
+        self.grid[enclosed_unoccupied] = OCCUPIED
         self.player_num_grid[enclosed] = player.num
 
         self.grid[free_tile] = UNOCCUPIED
