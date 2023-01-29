@@ -74,7 +74,6 @@ class PaperIO(ParallelEnv):
 
         self.player_dict = dict()
         self.grid = np.zeros((map_size, map_size), dtype=np.int8)
-        self.player_grid = np.full((map_size, map_size), None)
         self.player_num_grid = np.full((map_size, map_size), -1, dtype=np.int8)
         
         for player_num in range(self.num_agents):
@@ -105,7 +104,6 @@ class PaperIO(ParallelEnv):
         for cc in range(c - padding, c + padding + 1):
             for rr in range(r - padding, r + padding + 1):
                 self.grid[rr][cc] = OCCUPIED
-                self.player_grid[rr][cc] = player
                 self.player_num_grid[rr][cc] = player.num
                 player.push_zone((rr, cc))
 
@@ -265,19 +263,18 @@ class PaperIO(ParallelEnv):
                         
                         self.reset_player(player)
                     elif player_cell == OCCUPIED:
-                        occupied_by = self.player_grid[r][c]
-                        if player.last_unoccupied and  occupied_by == player:
+                        occ_num = self.player_num_grid[r][c]
+                        if player.last_unoccupied and occ_num == player.num:
                             self.update_occupancy(player)
                             player.last_unoccupied = False
-                        elif occupied_by != player:
+                        elif occ_num != player.num:
+                            occupied_by: Player = self.player_dict[self.agents[occ_num]]
                             occupied_by.pop_zone((r,c))
                             self.grid[r][c] = PASSED
-                            self.player_grid[r][c] = player
                             self.player_num_grid[r][c] = player.num
                             player.last_unoccupied = True
                     elif player_cell == UNOCCUPIED:
                         self.grid[r][c] = PASSED
-                        self.player_grid[r][c] = player
                         self.player_num_grid[r][c] = player.num
                         player.push_path((c,r))
                         player.last_unoccupied = True
@@ -298,7 +295,6 @@ class PaperIO(ParallelEnv):
                             owned_by.pop_zone((r,c))
 
                         self.grid[r][c] = PASSED
-                        self.player_grid[r][c] = player
                         self.player_num_grid[r][c] = player.num
                         player.push_path((c,r))
                         player.last_unoccupied = True
@@ -353,7 +349,6 @@ class PaperIO(ParallelEnv):
             x = indices[0][i]
             y = indices[1][i]
             self.grid[x][y] = UNOCCUPIED
-            self.player_grid[x][y] = None
             self.player_num_grid[x][y] = -1
 
         self.energies[player.num] = 0
@@ -395,7 +390,6 @@ class PaperIO(ParallelEnv):
         free_boost = self.grid == TEMP * BOOST
 
         self.grid[enclosed] = OCCUPIED
-        self.player_grid[enclosed] = player
         self.player_num_grid[enclosed] = player.num
 
         self.grid[free_tile] = UNOCCUPIED
