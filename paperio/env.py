@@ -230,8 +230,8 @@ class PaperIO(ParallelEnv):
                 turn = 0
 
                 if (action != None):
-                    attempted_action = action['turn']
                     try:
+                        attempted_action = action['turn']
                         if (int(attempted_action) in VALID_MOVES):
                             turn = attempted_action
                     except:
