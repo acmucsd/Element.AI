@@ -16,18 +16,37 @@ class Agent():
 
         obs, rewards, dones, infos = obs
 
-        board = np.array(obs['board']['board_state'])
-        player_owned = np.array(obs['board']['players_state'])
-        player_num = obs[self.player]['player_num']
+        # if resetting, don't waste time
+        if (obs[self.player]['resetting']):
+            return { 'turn': 0 }
 
-        occupied_territory = np.where(np.logical_and(board != PASSED, player_owned == player_num))
-        print(len(occupied_territory[0]), file=sys.stderr)
+        # if first iteration, save constant observations
+        # like player_num
+        if (iter == 0 and curr_step == 0):
+            self.num = obs[self.player]['player_num']
 
-        direction = 0
-        if iter % 10 == 0 and iter != 0: direction = 1
+        # separate player observation from board observation
+        me_obs = obs[self.player]
+        board_obs = obs['board']
 
+
+        # collection essential player info
+        direction = me_obs['direction']
+        head = me_obs['head']
+        energy = me_obs['energy']
+        speed = me_obs['speed']
+
+
+        # save arrays which describe board state to numpy arrays for processing
+        board = np.array(board_obs['board_state'])
+        player_owned = np.array(board_obs['players_state'])
+
+
+        # simple action: turn every 10 iterations
+        turn = 1 if iter % 10 == 0 and iter != 0 else 0
         action = {
-            'turn': direction
+            'turn': turn
         }
 
+        # note action should be a dict with action['turn'] = -1, 0, or 1
         return action
