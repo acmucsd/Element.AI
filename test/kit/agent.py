@@ -16,23 +16,31 @@ class Agent():
 
         obs, rewards, dones, infos = obs
 
-        self_obs = obs[self.player]
-        player_num = self_obs['player_num']
-        head = self_obs['head']
-        direction = self_obs['direction']
+        if (obs[self.player]['resetting']):
+            return { 'turn': 0 }
 
+        if (iter == 0 and curr_step == 0):
+            self.num = obs[self.player]['player_num']
+
+        me_obs = obs[self.player]
         board_obs = obs['board']
+
+
+        direction = me_obs['direction']
+        head = me_obs['head']
+        energy = me_obs['energy']
+        speed = me_obs['speed']
+
         board = np.array(board_obs['board_state'])
         player_owned = np.array(board_obs['players_state'])
 
-        occupied_territory = np.where(np.logical_and(board != PASSED, player_owned == player_num))
+        occupied_territory = np.where(np.logical_and(board != PASSED, player_owned == self.num))
         print(direction, len(occupied_territory[0]), file=sys.stderr)
 
-        direction = 0
-        if iter % 10 == 0 and iter != 0: direction = 1
+        turn = 1 if iter % 10 == 0 and iter != 0 else 0
 
         action = {
-            'turn': direction
+            'turn': turn
         }
 
         return action

@@ -231,8 +231,11 @@ class PaperIO(ParallelEnv):
 
                 if (action != None):
                     attempted_action = action['turn']
-                    if (attempted_action in VALID_MOVES):
-                        turn = attempted_action
+                    try:
+                        if (int(attempted_action) in VALID_MOVES):
+                            turn = attempted_action
+                    except:
+                        pass
 
                 if (not (player.reset or player.dead)): player.update(turn)
                 players_moving.append(player)
