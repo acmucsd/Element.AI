@@ -28,8 +28,6 @@ class Visualizer:
         self.screen.blit(resized, (0, 0))
 
     def update_scene(self, grid, player_num_grid, num_agents, player_dict: dict):
-        from arcade import color
-
         for i in range(num_agents):
             self.rgb_array[np.logical_and(grid == PASSED, player_num_grid == i)] = PLAYER_COLORS[i][0]
             self.rgb_array[np.logical_and(grid == OCCUPIED, player_num_grid == i)] = PLAYER_COLORS[i][1]
