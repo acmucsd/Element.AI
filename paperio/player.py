@@ -33,15 +33,6 @@ class Player:
 
         self.pos = (x, y)
 
-    def pop_zone(self, pos):
-        self.zone.discard(pos)
-    def push_zone(self, pos):
-        self.zone.add(pos)
-        self.path.discard(pos)
-
-    def push_path(self, pos):
-        if pos not in self.zone: self.path.add(pos)
-
     def reset_player(self):
         self.reset = True
         self.score = len(self.zone)

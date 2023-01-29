@@ -10,6 +10,7 @@ BOOST = 4
 class Agent():
     def __init__(self, player: str) -> None:
         self.player = player
+        self.last_reward = -1
         np.random.seed(0)
 
     def act(self, iter: int, curr_step: int, obs, remainingOverageTime: int = 60):
@@ -41,6 +42,10 @@ class Agent():
         board = np.array(board_obs['board_state'])
         player_owned = np.array(board_obs['players_state'])
 
+        if (curr_step == 0):
+            curr_reward = rewards[self.player]
+            print(curr_reward - self.last_reward, file=sys.stderr)
+            self.last_reward = curr_reward
 
         # simple action: turn every 10 iterations
         turn = 1 if iter % 10 == 0 and iter != 0 else 0

@@ -105,7 +105,6 @@ class PaperIO(ParallelEnv):
             for rr in range(r - padding, r + padding + 1):
                 self.grid[rr][cc] = OCCUPIED
                 self.player_num_grid[rr][cc] = player.num
-                player.push_zone((rr, cc))
 
 
     # TODO: Medium Priority
@@ -211,7 +210,7 @@ class PaperIO(ParallelEnv):
                 self._spawn_player(player, respawn=True)
                 player.reset = False
                 player.respawning = False
-            player.score += len(player.zone)
+            player.score += len(np.where(np.logical_and(self.grid != PASSED, self.player_num_grid == player.num))[0])
 
     def step(self, actions: ActionDict, step_num):
         """Receives a dictionary of actions keyed by the agent name.
@@ -272,14 +271,12 @@ class PaperIO(ParallelEnv):
                             player.last_unoccupied = False
                         elif occ_num != player.num:
                             occupied_by: Player = self.player_dict[self.agents[occ_num]]
-                            occupied_by.pop_zone((r,c))
                             self.grid[r][c] = PASSED
                             self.player_num_grid[r][c] = player.num
                             player.last_unoccupied = True
                     elif player_cell == UNOCCUPIED:
                         self.grid[r][c] = PASSED
                         self.player_num_grid[r][c] = player.num
-                        player.push_path((c,r))
                         player.last_unoccupied = True
                     elif player_cell == BOMB:
                         owned_by_num = self.player_num_grid[r][c]
@@ -293,14 +290,11 @@ class PaperIO(ParallelEnv):
                     elif player_cell == BOOST:
                         owned_by_num = self.player_num_grid[r][c]
 
-                        if (owned_by_num != player.num and owned_by_num != -1):
-                            owned_by: Player = self.player_dict[self.agents[owned_by_num]]
-                            owned_by.pop_zone((r,c))
-
-                        self.grid[r][c] = PASSED
-                        self.player_num_grid[r][c] = player.num
-                        player.push_path((c,r))
-                        player.last_unoccupied = True
+                        if (owned_by_num != player.num):
+                            self.grid[r][c] = PASSED
+                            self.player_num_grid[r][c] = player.num
+                            player.last_unoccupied = True
+                            
                         self.energies[player.num] += 1
                     else:
                         raise Exception("Unknown grid value")
