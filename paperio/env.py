@@ -112,9 +112,14 @@ class PaperIO(ParallelEnv):
     # will also need to handle seed being passed from reset() func
     def place_boost_bomb(self, rate = 1.0):
 
-        map_size = self.env_cfg.map_size
-        boost_count = int(self.env_cfg.boost_count * rate)
-        bomb_count = int(self.env_cfg.bomb_count * rate)
+        boost_locs = np.where(self.grid == BOOST)
+        bomb_locs = np.where(self.grid == BOMB)
+
+        missing_boosts = self.env_cfg.boost_count - len(boost_locs[0])
+        missing_bombs = self.env_cfg.bomb_count - len(bomb_locs[0])
+
+        boost_count = min(self.env_cfg.boost_respawn_rate, missing_boosts)
+        bomb_count = min(self.env_cfg.bomb_respawn_rate, missing_bombs)
 
         # place boosts
         while (boost_count>0):
@@ -249,7 +254,7 @@ class PaperIO(ParallelEnv):
             player: Player = x
 
             if (player.reset or player.dead):
-                player.respawning = True
+                if (step_num == 0): player.respawning = True
                 continue
             else:
                 c, r = player.pos
@@ -298,6 +303,9 @@ class PaperIO(ParallelEnv):
                         self.energies[player.num] += 1
                     else:
                         raise Exception("Unknown grid value")
+
+        if (step_num == max(self.speeds) - 1):
+            self._update_env()
         
         return self.observe()
 
@@ -347,7 +355,7 @@ class PaperIO(ParallelEnv):
         for i in range(len(indices[0])):
             x = indices[0][i]
             y = indices[1][i]
-            self.grid[x][y] = UNOCCUPIED
+            if (self.grid[x][y] not in [BOMB, BOOST]): self.grid[x][y] = UNOCCUPIED
             self.player_num_grid[x][y] = -1
 
         self.energies[player.num] = 0
@@ -383,12 +391,13 @@ class PaperIO(ParallelEnv):
         grid_occupied_targ = np.logical_or(self.grid == UNOCCUPIED, grid_bomb_or_boost)
         grid_player_passed = np.logical_and(self.grid == PASSED, self.player_num_grid == player.num)
         enclosed = np.logical_or(grid_player_passed, grid_occupied_targ)
+        enclosed_occupied = np.logical_or(grid_player_passed, self.grid == UNOCCUPIED)
 
         free_tile = self.grid == TEMP
         free_bomb = self.grid == TEMP * BOMB
         free_boost = self.grid == TEMP * BOOST
 
-        self.grid[enclosed] = OCCUPIED
+        self.grid[enclosed_occupied] = OCCUPIED
         self.player_num_grid[enclosed] = player.num
 
         self.grid[free_tile] = UNOCCUPIED

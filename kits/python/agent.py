@@ -19,6 +19,8 @@ class Agent():
 
         # if resetting, don't waste time
         if (obs[self.player]['resetting']):
+            # note we still return a valid action, else the env will log the errors
+            # and clutter up the console
             return { 'turn': 0 }
 
         # if first iteration, save constant observations
@@ -42,13 +44,8 @@ class Agent():
         board = np.array(board_obs['board_state'])
         player_owned = np.array(board_obs['players_state'])
 
-        if (curr_step == 0):
-            curr_reward = rewards[self.player]
-            print(curr_reward - self.last_reward, file=sys.stderr)
-            self.last_reward = curr_reward
-
         # simple action: turn every 10 iterations
-        turn = 1 if iter % 10 == 0 and iter != 0 else 0
+        turn = 1 if iter % 9 == 0 and iter != 0 else 0
         action = {
             'turn': turn
         }
