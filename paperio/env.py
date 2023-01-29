@@ -319,7 +319,7 @@ class PaperIO(ParallelEnv):
                 'player_num': player.num,
                 'direction': DIRECTIONS[player.direction] if not player.reset else (-1, -1),
                 'resetting': player.reset,
-                'head': player.pos,
+                'head': (player.pos[1], player.pos[0]),
                 'energy': self.energies[player.num],
                 'speed': self.speeds[player.num],
                 # NOTE: see observation_space function
@@ -429,14 +429,14 @@ class PaperIO(ParallelEnv):
         if (mode == 'human'):
             if self._init_render():
                 self.py_visualizer.init_window()
-            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid, num_agents=self.num_agents)
+            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid, self.num_agents, self.player_dict)
             self.py_visualizer.render()
         
 
         elif (mode == 'rgb_array'):
             self._init_render()
-            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid, num_agents=self.num_agents)
-            return self.py_visualizer.rgb_array
+            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid, self.num_agents, self.player_dict)
+            return np.copy(self.py_visualizer.rgb_array)
 
     def close(self):
         """Closes the rendering window."""
