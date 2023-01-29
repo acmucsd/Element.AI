@@ -315,9 +315,11 @@ class PaperIO(ParallelEnv):
         for agent in self.agents:
             player:Player = self.player_dict[agent]
 
+            env_dir = DIRECTIONS[player.direction]
+
             observations[agent] = {
                 'player_num': player.num,
-                'direction': DIRECTIONS[player.direction] if not player.reset else (-1, -1),
+                'direction': [env_dir[1], env_dir[0]] if not player.reset else (-1, -1),
                 'resetting': player.reset,
                 'head': (player.pos[1], player.pos[0]),
                 'energy': self.energies[player.num],

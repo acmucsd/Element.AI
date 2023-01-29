@@ -16,12 +16,17 @@ class Agent():
 
         obs, rewards, dones, infos = obs
 
-        board = np.array(obs['board']['board_state'])
-        player_owned = np.array(obs['board']['players_state'])
-        player_num = obs[self.player]['player_num']
+        self_obs = obs[self.player]
+        player_num = self_obs['player_num']
+        head = self_obs['head']
+        direction = self_obs['direction']
+
+        board_obs = obs['board']
+        board = np.array(board_obs['board_state'])
+        player_owned = np.array(board_obs['players_state'])
 
         occupied_territory = np.where(np.logical_and(board != PASSED, player_owned == player_num))
-        print(len(occupied_territory[0]), file=sys.stderr)
+        print(direction, len(occupied_territory[0]), file=sys.stderr)
 
         direction = 0
         if iter % 10 == 0 and iter != 0: direction = 1
