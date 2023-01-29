@@ -92,7 +92,6 @@ class PaperIO(ParallelEnv):
         if (respawn):
             empty = np.where(self.grid == UNOCCUPIED)
             if (len(empty[0]) == 0):
-                player.dead = True
                 return
             
             choice = random.randrange(0, len(empty[0]))
@@ -215,7 +214,7 @@ class PaperIO(ParallelEnv):
 
         for player_num in range(self.num_agents):
             player: Player = self.player_dict[self.agents[player_num]]
-            if (player.respawning and not player.dead):
+            if (player.respawning):
                 self._spawn_player(player, respawn=True)
                 player.reset = False
                 player.respawning = False
@@ -245,7 +244,7 @@ class PaperIO(ParallelEnv):
                     except:
                         pass
 
-                if (not (player.reset or player.dead)): player.update(turn)
+                if (not (player.reset)): player.update(turn)
                 players_moving.append(player)
 
         # TODO: Low priority
@@ -257,7 +256,7 @@ class PaperIO(ParallelEnv):
         for x in players_moving:
             player: Player = x
 
-            if (player.reset or player.dead):
+            if (player.reset):
                 if (step_num == 0): player.respawning = True
                 continue
             else:
@@ -343,7 +342,7 @@ class PaperIO(ParallelEnv):
             # NOTE: dones is false until hit max_episode_length
             # or until the player is dead (i.e. board full, can't respawn)
             rewards[agent] = player.score
-            dones[agent] = env_done or player.dead
+            dones[agent] = env_done
             infos[agent] = None
 
         observations['board'] = {

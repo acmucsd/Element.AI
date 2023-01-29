@@ -23,24 +23,21 @@ def main():
     # replay configs
     parser.add_argument("-o", "--output", help="Where to output replays. Default is none and no replay is generated")
     parser.add_argument("--replay.save_format", help="Save format \"json\" works with the visualizer while pickle is a compact, python usable version", default="json")
-    # parser.add_argument("--replay.compressed_obs", help="Whether to save compressed observations or not. Compressed observations do not contain the full observation at each step. In particular, the map information is stored as the first observation, subsequent observations only store the changes that happened.", default=True)
 
     # episode configs
     parser.add_argument(
         "-v", "--verbose", help="Verbose Level (0 = silent, 1 = errors, 2 = warnings, 3 = info)", type=int, default=1
     )
-    parser.add_argument("-s", "--seed", help="Fix a seed for episode(s). All episodes will initialize the same.", type=int)
 
     # env configs
-
+    parser.add_argument("-s", "--seed", help="Fix a seed for episode(s). All episodes will initialize the same.", type=int)
     parser.add_argument("--render", help="Render with a window", action="store_true", default=False)
-
-    # parser.add_argument("--tournament", help="Turn tournament mode on", action="store_true", default=False)
-    # parser.add_argument("--tournament_cfg.concurrent", help="Max concurrent number of episodes to run. Recommended to set no higher than the number of CPUs / 2", type=int, default=1)
-    # parser.add_argument("--skip_validate_action_space", help="Set this for a small performance increase. Note that turning this on means the engine assumes your submitted actions are valid. If your actions are not well formatted there could be errors", action="store_true", default=False)
 
 
     args = parser.parse_args()
+
+    num_players = len(args.players)
+    map_size = 70 if num_players == 2 else 85 if num_players == 3 else 100 if num_players == 4 else 70
 
     # TODO make a tournament runner ranked by ELO, Wins/Losses, Trueskill, Bradley-Terry system
     cfg = EpisodeConfig(
@@ -50,12 +47,10 @@ def main():
             seed=args.seed,
             env_cfg=dict(
                 num_players=len(args.players),
-                # verbose=args.verbose,
-                # validate_action_space=not args.skip_validate_action_space,
                 max_episode_length=args.len,
-                map_size=100,
+                map_size=map_size,
             ),
-            # verbosity=args.verbose,
+            verbosity=args.verbose,
             save_replay_path=args.output,
             replay_options=ReplayConfig(
                 save_format=getattr(args, "replay.save_format"),
@@ -72,32 +67,6 @@ def main():
     asyncio.run(eps.run())
     etime = time.time()
     print(etime - stime)
-
-    # if args.tournament:
-    #     import os
-    #     if os.path.isdir(args.players[0]):
-    #         assert len(args.players) == 1, "Found more than one positional argument despite being given a directory of players"
-    #         subfolders = [ f.path for f in os.scandir(args.players[0]) if f.is_dir() ]
-    #         agents = []
-    #         for sub_dir in subfolders:
-    #             agent_file = os.path.join(sub_dir, "main.py")
-    #             if os.path.isfile(agent_file):
-    #                 agents.append(agent_file)
-    #         print(f"Found {len(agents)} in {args.players[0]}")
-    #         args.players = agents
-    #     tourney = Tournament(tournament_config_kwargs=dict(agents=args.players, max_concurrent_episodes=getattr(args, "tournament_cfg.concurrent")), episode_cfg=cfg)
-    #     # import ipdb;ipdb.set_trace()
-    #     asyncio.run(tourney.run())
-    #     # exit()
-    # else:
-        # import time
-        # stime = time.time()
-        # eps = Episode(
-        #     cfg=cfg
-        # )
-        # asyncio.run(eps.run())
-        # etime = time.time()
-        # print(etime - stime)
 
 if __name__ == "__main__":
     main()
