@@ -152,7 +152,6 @@ class Episode:
 
                 curr_step += 1
 
-            self.env._update_env()
         self.log.info(f"Final Scores: {rewards}")
         if save_replay:
             self.save_replay(replay)

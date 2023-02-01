@@ -74,7 +74,6 @@ class PaperIO(ParallelEnv):
 
         self.player_dict = dict()
         self.grid = np.zeros((map_size, map_size), dtype=np.int8)
-        self.player_grid = np.full((map_size, map_size), None)
         self.player_num_grid = np.full((map_size, map_size), -1, dtype=np.int8)
         
         for player_num in range(self.num_agents):
@@ -86,14 +85,13 @@ class PaperIO(ParallelEnv):
         self.energies = [0] * self.num_agents
         self.speeds = [1] * self.num_agents
 
-        self.place_boost_bomb()
+        self.place_boost_bomb(initial_spawn=True)
 
     def _spawn_player(self, player: Player, respawn=False):
 
         if (respawn):
             empty = np.where(self.grid == UNOCCUPIED)
             if (len(empty[0]) == 0):
-                player.dead = True
                 return
             
             choice = random.randrange(0, len(empty[0]))
@@ -105,19 +103,26 @@ class PaperIO(ParallelEnv):
         for cc in range(c - padding, c + padding + 1):
             for rr in range(r - padding, r + padding + 1):
                 self.grid[rr][cc] = OCCUPIED
-                self.player_grid[rr][cc] = player
                 self.player_num_grid[rr][cc] = player.num
-                player.push_zone((rr, cc))
 
 
     # TODO: Medium Priority
     # seed-based bomb and boost placement (deterministic env)
     # will also need to handle seed being passed from reset() func
-    def place_boost_bomb(self, rate = 1.0):
+    def place_boost_bomb(self, initial_spawn = False):
 
-        map_size = self.env_cfg.map_size
-        boost_count = int(self.env_cfg.boost_count * rate)
-        bomb_count = int(self.env_cfg.bomb_count * rate)
+        boost_locs = np.where(self.grid == BOOST)
+        bomb_locs = np.where(self.grid == BOMB)
+
+        missing_boosts = self.env_cfg.boost_count - len(boost_locs[0])
+        missing_bombs = self.env_cfg.bomb_count - len(bomb_locs[0])
+
+        boost_count = min(self.env_cfg.boost_respawn_rate, missing_boosts)
+        bomb_count = min(self.env_cfg.bomb_respawn_rate, missing_bombs)
+
+        if (initial_spawn):
+            boost_count = int(self.env_cfg.boost_count / 2)
+            bomb_count = int(self.env_cfg.bomb_count / 2)
 
         # place boosts
         while (boost_count>0):
@@ -205,15 +210,15 @@ class PaperIO(ParallelEnv):
     def _update_env(self):
         self.update_speeds()
         self.env_steps += 1
-        self.place_boost_bomb(rate = 0.1)
+        self.place_boost_bomb()
 
         for player_num in range(self.num_agents):
             player: Player = self.player_dict[self.agents[player_num]]
-            if (player.respawning and not player.dead):
+            if (player.respawning):
                 self._spawn_player(player, respawn=True)
                 player.reset = False
                 player.respawning = False
-            player.score += len(player.zone)
+            player.score += len(np.where(np.logical_and(self.grid != PASSED, self.player_num_grid == player.num))[0])
 
     def step(self, actions: ActionDict, step_num):
         """Receives a dictionary of actions keyed by the agent name.
@@ -232,11 +237,14 @@ class PaperIO(ParallelEnv):
                 turn = 0
 
                 if (action != None):
-                    attempted_action = action['turn']
-                    if (attempted_action in VALID_MOVES):
-                        turn = attempted_action
+                    try:
+                        attempted_action = action['turn']
+                        if (int(attempted_action) in VALID_MOVES):
+                            turn = attempted_action
+                    except:
+                        pass
 
-                player.update(turn)
+                if (not (player.reset)): player.update(turn)
                 players_moving.append(player)
 
         # TODO: Low priority
@@ -248,8 +256,8 @@ class PaperIO(ParallelEnv):
         for x in players_moving:
             player: Player = x
 
-            if (player.reset or player.dead):
-                player.respawning = True
+            if (player.reset):
+                if (step_num == 0): player.respawning = True
                 continue
             else:
                 c, r = player.pos
@@ -265,21 +273,18 @@ class PaperIO(ParallelEnv):
                         
                         self.reset_player(player)
                     elif player_cell == OCCUPIED:
-                        occupied_by = self.player_grid[r][c]
-                        if player.last_unoccupied and  occupied_by == player:
+                        occ_num = self.player_num_grid[r][c]
+                        if player.last_unoccupied and occ_num == player.num:
                             self.update_occupancy(player)
                             player.last_unoccupied = False
-                        elif occupied_by != player:
-                            occupied_by.pop_zone((r,c))
+                        elif occ_num != player.num:
+                            occupied_by: Player = self.player_dict[self.agents[occ_num]]
                             self.grid[r][c] = PASSED
-                            self.player_grid[r][c] = player
                             self.player_num_grid[r][c] = player.num
                             player.last_unoccupied = True
                     elif player_cell == UNOCCUPIED:
                         self.grid[r][c] = PASSED
-                        self.player_grid[r][c] = player
                         self.player_num_grid[r][c] = player.num
-                        player.push_path((c,r))
                         player.last_unoccupied = True
                     elif player_cell == BOMB:
                         owned_by_num = self.player_num_grid[r][c]
@@ -293,18 +298,17 @@ class PaperIO(ParallelEnv):
                     elif player_cell == BOOST:
                         owned_by_num = self.player_num_grid[r][c]
 
-                        if (owned_by_num != player.num and owned_by_num != -1):
-                            owned_by: Player = self.player_dict[self.agents[owned_by_num]]
-                            owned_by.pop_zone((r,c))
-
-                        self.grid[r][c] = PASSED
-                        self.player_grid[r][c] = player
-                        self.player_num_grid[r][c] = player.num
-                        player.push_path((c,r))
-                        player.last_unoccupied = True
+                        if (owned_by_num != player.num):
+                            self.grid[r][c] = PASSED
+                            self.player_num_grid[r][c] = player.num
+                            player.last_unoccupied = True
+                            
                         self.energies[player.num] += 1
                     else:
                         raise Exception("Unknown grid value")
+
+        if (step_num == max(self.speeds) - 1):
+            self._update_env()
         
         return self.observe()
 
@@ -319,11 +323,13 @@ class PaperIO(ParallelEnv):
         for agent in self.agents:
             player:Player = self.player_dict[agent]
 
+            env_dir = DIRECTIONS[player.direction]
+
             observations[agent] = {
                 'player_num': player.num,
-                'direction': DIRECTIONS[player.direction] if not player.reset else (-1, -1),
+                'direction': [env_dir[1], env_dir[0]] if not player.reset else (-1, -1),
                 'resetting': player.reset,
-                'head': player.pos,
+                'head': (player.pos[1], player.pos[0]),
                 'energy': self.energies[player.num],
                 'speed': self.speeds[player.num],
                 # NOTE: see observation_space function
@@ -336,7 +342,7 @@ class PaperIO(ParallelEnv):
             # NOTE: dones is false until hit max_episode_length
             # or until the player is dead (i.e. board full, can't respawn)
             rewards[agent] = player.score
-            dones[agent] = env_done or player.dead
+            dones[agent] = env_done
             infos[agent] = None
 
         observations['board'] = {
@@ -352,8 +358,7 @@ class PaperIO(ParallelEnv):
         for i in range(len(indices[0])):
             x = indices[0][i]
             y = indices[1][i]
-            self.grid[x][y] = UNOCCUPIED
-            self.player_grid[x][y] = None
+            if (self.grid[x][y] not in [BOMB, BOOST]): self.grid[x][y] = UNOCCUPIED
             self.player_num_grid[x][y] = -1
 
         self.energies[player.num] = 0
@@ -362,33 +367,45 @@ class PaperIO(ParallelEnv):
         player.reset_player()
 
     def update_occupancy(self, player: Player):
-
         map_size = self.env_cfg.map_size
+        indices = np.moveaxis(np.mgrid[:map_size,:map_size], 0, -1)
+        edge = np.concatenate((indices[0,:], indices[map_size-1,:], indices[1:map_size-1,0], indices[1:map_size-1,map_size-1]))
 
-        queue = collections.deque([])
-        for r in range(map_size):
-            for c in range(map_size):
-                if (r in [0, map_size-1] or c in [0, map_size-1]) and self.grid[r][c] == UNOCCUPIED:
-                    queue.append((r, c))
+        OCCUPIED_TARGS = [UNOCCUPIED, BOMB, BOOST]
+
+        queue = collections.deque(edge.tolist())
+        explored = np.full((map_size, map_size), False)
         while queue:
             r, c = queue.popleft()
-            if 0<=r<map_size and 0<=c<map_size and self.grid[r][c] == UNOCCUPIED:
-                self.grid[r][c] = TEMP
-                queue.extend([(r-1, c),(r+1, c),(r, c-1),(r, c+1)])
 
-        for r in range(map_size):
-            for c in range(map_size):
-                cell = self.grid[r][c]
-                occupied_by = self.player_grid[r][c]
-                if (occupied_by == player and cell == PASSED) or cell == UNOCCUPIED:
-                    self.grid[r][c] = OCCUPIED
-                    self.player_grid[r][c] = player
-                    self.player_num_grid[r][c] = player.num
-                    player.push_zone((c,r))
-                elif cell == -1:
-                    self.grid[r][c] = UNOCCUPIED
-                    self.player_grid[r][c] = None
-                    self.player_num_grid[r][c] = -1
+            if (0 <= r < map_size and 0 <= c < map_size) and (not explored[r,c]):
+                explored[r,c] = True
+            
+                cell = self.grid[r,c]
+                occ_num = self.player_num_grid[r,c]
+
+                if (cell in OCCUPIED_TARGS) or (occ_num != player.num):
+
+                    self.grid[r,c] = TEMP if cell == UNOCCUPIED else TEMP * BOMB if cell == BOMB else TEMP * BOOST if cell == BOOST else self.grid[r,c]
+
+                    queue.extend([(r-1, c),(r+1, c),(r, c-1),(r, c+1)])
+
+        grid_bomb_or_boost = np.logical_or(self.grid == BOMB, self.grid == BOOST)
+        grid_occupied_targ = np.logical_or(self.grid == UNOCCUPIED, grid_bomb_or_boost)
+        grid_player_passed = np.logical_and(self.grid == PASSED, self.player_num_grid == player.num)
+        enclosed = np.logical_or(grid_player_passed, grid_occupied_targ)
+        enclosed_unoccupied = np.logical_or(grid_player_passed, self.grid == UNOCCUPIED)
+
+        free_tile = self.grid == TEMP
+        free_bomb = self.grid == TEMP * BOMB
+        free_boost = self.grid == TEMP * BOOST
+
+        self.grid[enclosed_unoccupied] = OCCUPIED
+        self.player_num_grid[enclosed] = player.num
+
+        self.grid[free_tile] = UNOCCUPIED
+        self.grid[free_bomb] = BOMB
+        self.grid[free_boost] = BOOST
 
     def reset(
         self,
@@ -423,14 +440,14 @@ class PaperIO(ParallelEnv):
         if (mode == 'human'):
             if self._init_render():
                 self.py_visualizer.init_window()
-            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid, num_agents=self.num_agents)
+            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid, self.num_agents, self.player_dict)
             self.py_visualizer.render()
         
 
         elif (mode == 'rgb_array'):
             self._init_render()
-            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid, num_agents=self.num_agents)
-            return self.py_visualizer.rgb_array
+            if (not skip_update): self.py_visualizer.update_scene(self.grid, self.player_num_grid, self.num_agents, self.player_dict)
+            return np.copy(self.py_visualizer.rgb_array)
 
     def close(self):
         """Closes the rendering window."""

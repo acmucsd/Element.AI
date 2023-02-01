@@ -21,4 +21,8 @@ class EnvConfig:
     Board Configs
     """
     bomb_count: int = 10
+    bomb_respawn_rate: int = 2
+
     boost_count: int = 40
+    boost_respawn_rate: int = 2
+
