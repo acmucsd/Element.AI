@@ -113,8 +113,8 @@ class PaperIO(ParallelEnv):
         missing_boosts = self.env_cfg.boost_count - len(boost_locs[0])
         missing_bombs = self.env_cfg.bomb_count - len(bomb_locs[0])
 
-        boost_count = min(self.env_cfg.boost_respawn_rate, missing_boosts)
-        bomb_count = min(self.env_cfg.bomb_respawn_rate, missing_bombs)
+        boost_count = 1#min(self.env_cfg.boost_respawn_rate, missing_boosts)
+        bomb_count = 0#min(self.env_cfg.bomb_respawn_rate, missing_bombs)
 
         if (initial_spawn):
             boost_count = int(self.env_cfg.boost_count / 2)
@@ -288,6 +288,10 @@ class PaperIO(ParallelEnv):
                             self.grid[r][c] = PASSED
                             self.player_num_grid[r][c] = player.num
                             player.last_unoccupied = True
+                        else:
+                            self.grid[r][c] = OCCUPIED
+                            self.update_occupancy(player)
+                            player.last_unoccupied = False
                             
                         self.energies[player.num] += 1
                     else:
