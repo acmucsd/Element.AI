@@ -34,4 +34,5 @@ class Player:
         self.pos = (x, y)
 
     def reset_player(self):
+        self.direction = 0
         self.reset = True

@@ -67,9 +67,9 @@ class PaperIO(ParallelEnv):
         map_size = self.env_cfg.map_size
         self.starting_coords = [
             (int(map_size/4), int(map_size/4)),
+            (int(map_size/4)*3, int(map_size/4)),
             (int(map_size/4), int(map_size/4)*3),
             (int(map_size/4)*3, int(map_size/4)*3),
-            (int(map_size/4)*3, int(map_size/4)),
         ]
 
         self.player_dict = dict()
