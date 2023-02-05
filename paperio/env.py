@@ -85,7 +85,7 @@ class PaperIO(ParallelEnv):
         self.energies = [0] * self.num_agents
         self.speeds = [1] * self.num_agents
 
-        self.place_boost_bomb(initial_spawn=True)
+        self._place_boost_bomb(initial_spawn=True)
 
     def _spawn_player(self, player: Player, respawn=False):
 
@@ -95,7 +95,7 @@ class PaperIO(ParallelEnv):
                 return
             
             choice = random.randrange(0, len(empty[0]))
-            player.pos = (empty[0][choice], empty[1][choice])
+            player.pos = (empty[1][choice], empty[0][choice])
         
         padding = 0 if respawn else 1
 
@@ -109,7 +109,7 @@ class PaperIO(ParallelEnv):
     # TODO: Medium Priority
     # seed-based bomb and boost placement (deterministic env)
     # will also need to handle seed being passed from reset() func
-    def place_boost_bomb(self, initial_spawn = False):
+    def _place_boost_bomb(self, initial_spawn = False):
 
         boost_locs = np.where(self.grid == BOOST)
         bomb_locs = np.where(self.grid == BOMB)
@@ -190,7 +190,7 @@ class PaperIO(ParallelEnv):
     Env Runtime Functions
     """
 
-    def update_speeds(self):
+    def _update_speeds(self):
         # NOTE: This need to be adjusted once better spawn algo done
         # resultant speeds:
         #               2, 3, 4,  5
@@ -208,9 +208,9 @@ class PaperIO(ParallelEnv):
             i += 1
 
     def _update_env(self):
-        self.update_speeds()
+        self._update_speeds()
         self.env_steps += 1
-        self.place_boost_bomb()
+        self._place_boost_bomb()
 
         for player_num in range(self.num_agents):
             player: Player = self.player_dict[self.agents[player_num]]
