@@ -28,11 +28,13 @@ class Visualizer:
         self.screen.blit(resized, (0, 0))
 
     def update_scene(self, grid, player_num_grid, num_agents, player_dict: dict):
+        grid = np.transpose(grid)
+        player_num_grid = np.transpose(player_num_grid)
         for i in range(num_agents):
             self.rgb_array[np.logical_and(grid == PASSED, player_num_grid == i)] = PLAYER_COLORS[i][0]
             self.rgb_array[np.logical_and(grid == OCCUPIED, player_num_grid == i)] = PLAYER_COLORS[i][1]
         for player in player_dict.values():
-            self.rgb_array[player.pos[1],player.pos[0]] = PLAYER_HEAD_COLOR
+            self.rgb_array[player.pos] = PLAYER_HEAD_COLOR
         self.rgb_array[grid == UNOCCUPIED] = WHITE_SMOKE
         self.rgb_array[grid == BOMB] = BLACK
         self.rgb_array[grid == BOOST] = PURPLE
