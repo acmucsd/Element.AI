@@ -95,7 +95,7 @@ class PaperIO(ParallelEnv):
                 return
             
             choice = random.randrange(0, len(empty[0]))
-            player.pos = (empty[0][choice], empty[1][choice])
+            player.pos = (empty[1][choice], empty[0][choice])
         
         padding = 0 if respawn else 1
 
@@ -385,8 +385,14 @@ class PaperIO(ParallelEnv):
                 occ_num = self.player_num_grid[r,c]
 
                 if (cell in OCCUPIED_TARGS) or (occ_num != player.num):
-
-                    self.grid[r,c] = TEMP if cell == UNOCCUPIED else TEMP * BOMB if cell == BOMB else TEMP * BOOST if cell == BOOST else self.grid[r,c]
+                    if cell == UNOCCUPIED:
+                        self.grid[r,c] = TEMP
+                    elif cell == BOMB:
+                        self.grid[r,c] = TEMP * BOMB 
+                    elif cell == BOOST:
+                        self.grid[r,c] = TEMP * BOOST
+                    elif cell == OCCUPIED:
+                        self.grid[r,c] = TEMP * OCCUPIED
 
                     queue.extend([(r-1, c),(r+1, c),(r, c-1),(r, c+1)])
 
@@ -394,18 +400,22 @@ class PaperIO(ParallelEnv):
         grid_occupied_targ = np.logical_or(self.grid == UNOCCUPIED, grid_bomb_or_boost)
         grid_player_passed = np.logical_and(self.grid == PASSED, self.player_num_grid == player.num)
         enclosed = np.logical_or(grid_player_passed, grid_occupied_targ)
+        enclosed_occupied = self.grid == OCCUPIED
         enclosed_unoccupied = np.logical_or(grid_player_passed, self.grid == UNOCCUPIED)
 
         free_tile = self.grid == TEMP
         free_bomb = self.grid == TEMP * BOMB
         free_boost = self.grid == TEMP * BOOST
+        free_occupied = self.grid == TEMP * OCCUPIED
 
         self.grid[enclosed_unoccupied] = OCCUPIED
         self.player_num_grid[enclosed] = player.num
+        self.player_num_grid[enclosed_occupied] = player.num
 
         self.grid[free_tile] = UNOCCUPIED
         self.grid[free_bomb] = BOMB
         self.grid[free_boost] = BOOST
+        self.grid[free_occupied] = OCCUPIED
 
     def reset(
         self,
