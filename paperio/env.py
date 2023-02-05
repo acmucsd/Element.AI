@@ -105,10 +105,6 @@ class PaperIO(ParallelEnv):
                 self.grid[rr][cc] = OCCUPIED
                 self.player_num_grid[rr][cc] = player.num
 
-
-    # TODO: Medium Priority
-    # seed-based bomb and boost placement (deterministic env)
-    # will also need to handle seed being passed from reset() func
     def _place_boost_bomb(self, initial_spawn = False):
 
         boost_locs = np.where(self.grid == BOOST)
@@ -165,10 +161,6 @@ class PaperIO(ParallelEnv):
             head=spaces.Box(low=-1, high=self.env_cfg.map_size, dtype=int),
             energy=spaces.Box(low=0, high=1000, dtype=int),
             speed=spaces.Box(low=1, high=5, dtype=int)
-            # TODO: High Priority
-            # figure out implementation of the below items
-            # "tail": player.path,
-            # "zone": player.zone,
         )
 
         obs_space['board'] = spaces.Dict(
@@ -247,12 +239,6 @@ class PaperIO(ParallelEnv):
                 if (not (player.reset)): player.update(turn)
                 players_moving.append(player)
 
-        # TODO: Low priority
-        # Note that much of the code below is checking edge cases that only arose in GridEnvV1
-        # due to the clock-based system used in arcade
-        # It shouldn't be a problem, but may come up in testing, and should be cleaned eventually
-        # for performance improvements
-        # Also ideally we remove self.player_grid and move to only using self.player_num_grid
         for x in players_moving:
             player: Player = x
 
@@ -335,10 +321,6 @@ class PaperIO(ParallelEnv):
                 # "zone": player.zone,
             }
 
-            # TODO: High priority
-            # Implement rewards and infos discts
-            # NOTE: dones is false until hit max_episode_length
-            # or until the player is dead (i.e. board full, can't respawn)
             rewards[agent] = player.score
             dones[agent] = env_done
             infos[agent] = None
@@ -433,10 +415,6 @@ class PaperIO(ParallelEnv):
         np.random.seed(seed)
         random.seed(seed)
         
-        
-    # TODO: high priority
-    # make mode='rgb_array' more efficient
-    # add mode='human' support (pygame -- see luxai2022 comp for an example)
     def _init_render(self):
         if self.py_visualizer is None:
             self.py_visualizer = Visualizer(self.env_cfg.map_size)
