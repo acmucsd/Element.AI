@@ -316,9 +316,6 @@ class PaperIO(ParallelEnv):
                 'head': player.pos,
                 'energy': self.energies[player.num],
                 'speed': self.speeds[player.num],
-                # NOTE: see observation_space function
-                # "tail": player.path,
-                # "zone": player.zone,
             }
 
             rewards[agent] = player.score
@@ -442,17 +439,17 @@ class PaperIO(ParallelEnv):
         pygame.quit()
 
     # NOTE: seems redundant, all necessary board info already given to agent in observe()
-    # def state(self) -> np.ndarray:
-    #     """Returns the state.
+    def state(self) -> np.ndarray:
+        """Returns the state.
 
-    #     State returns a global view of the environment appropriate for
-    #     centralized training decentralized execution methods like QMIX
-    #     """
-    #     raise NotImplementedError(
-    #         "state() method has not been implemented in the environment {}.".format(
-    #             self.metadata.get("name", self.__class__.__name__)
-    #         )
-    #     )
+        State returns a global view of the environment appropriate for
+        centralized training decentralized execution methods like QMIX
+        """
+        raise NotImplementedError(
+            "state() method has not been implemented in the environment {}.".format(
+                self.metadata.get("name", self.__class__.__name__)
+            )
+        )
 
 
     
