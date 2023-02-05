@@ -35,7 +35,7 @@ class Agent():
         player_owned = np.array(board_obs['players_state'])
 
         occupied_territory = np.where(np.logical_and(board != PASSED, player_owned == self.num))
-        print(direction, len(occupied_territory[0]), file=sys.stderr)
+        # print(direction, len(occupied_territory[0]), file=sys.stderr)
 
         turn = 1 if iter % 10 == 0 and iter != 0 else 0
 

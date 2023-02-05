@@ -67,9 +67,9 @@ class PaperIO(ParallelEnv):
         map_size = self.env_cfg.map_size
         self.starting_coords = [
             (int(map_size/4), int(map_size/4)),
+            (int(map_size/4)*3, int(map_size/4)),
             (int(map_size/4), int(map_size/4)*3),
             (int(map_size/4)*3, int(map_size/4)*3),
-            (int(map_size/4)*3, int(map_size/4)),
         ]
 
         self.player_dict = dict()
@@ -85,7 +85,7 @@ class PaperIO(ParallelEnv):
         self.energies = [0] * self.num_agents
         self.speeds = [1] * self.num_agents
 
-        self.place_boost_bomb(initial_spawn=True)
+        self._place_boost_bomb(initial_spawn=True)
 
     def _spawn_player(self, player: Player, respawn=False):
 
@@ -95,7 +95,7 @@ class PaperIO(ParallelEnv):
                 return
             
             choice = random.randrange(0, len(empty[0]))
-            player.pos = (empty[0][choice], empty[1][choice])
+            player.pos = (empty[1][choice], empty[0][choice])
         
         padding = 0 if respawn else 1
 
@@ -105,11 +105,7 @@ class PaperIO(ParallelEnv):
                 self.grid[rr][cc] = OCCUPIED
                 self.player_num_grid[rr][cc] = player.num
 
-
-    # TODO: Medium Priority
-    # seed-based bomb and boost placement (deterministic env)
-    # will also need to handle seed being passed from reset() func
-    def place_boost_bomb(self, initial_spawn = False):
+    def _place_boost_bomb(self, initial_spawn = False):
 
         boost_locs = np.where(self.grid == BOOST)
         bomb_locs = np.where(self.grid == BOMB)
@@ -165,10 +161,6 @@ class PaperIO(ParallelEnv):
             head=spaces.Box(low=-1, high=self.env_cfg.map_size, dtype=int),
             energy=spaces.Box(low=0, high=1000, dtype=int),
             speed=spaces.Box(low=1, high=5, dtype=int)
-            # TODO: High Priority
-            # figure out implementation of the below items
-            # "tail": player.path,
-            # "zone": player.zone,
         )
 
         obs_space['board'] = spaces.Dict(
@@ -190,7 +182,7 @@ class PaperIO(ParallelEnv):
     Env Runtime Functions
     """
 
-    def update_speeds(self):
+    def _update_speeds(self):
         # NOTE: This need to be adjusted once better spawn algo done
         # resultant speeds:
         #               2, 3, 4,  5
@@ -208,9 +200,9 @@ class PaperIO(ParallelEnv):
             i += 1
 
     def _update_env(self):
-        self.update_speeds()
+        self._update_speeds()
         self.env_steps += 1
-        self.place_boost_bomb()
+        self._place_boost_bomb()
 
         for player_num in range(self.num_agents):
             player: Player = self.player_dict[self.agents[player_num]]
@@ -247,12 +239,6 @@ class PaperIO(ParallelEnv):
                 if (not (player.reset)): player.update(turn)
                 players_moving.append(player)
 
-        # TODO: Low priority
-        # Note that much of the code below is checking edge cases that only arose in GridEnvV1
-        # due to the clock-based system used in arcade
-        # It shouldn't be a problem, but may come up in testing, and should be cleaned eventually
-        # for performance improvements
-        # Also ideally we remove self.player_grid and move to only using self.player_num_grid
         for x in players_moving:
             player: Player = x
 
@@ -302,6 +288,10 @@ class PaperIO(ParallelEnv):
                             self.grid[r][c] = PASSED
                             self.player_num_grid[r][c] = player.num
                             player.last_unoccupied = True
+                        else:
+                            self.grid[r][c] = OCCUPIED
+                            self.update_occupancy(player)
+                            player.last_unoccupied = False
                             
                         self.energies[player.num] += 1
                     else:
@@ -323,24 +313,15 @@ class PaperIO(ParallelEnv):
         for agent in self.agents:
             player:Player = self.player_dict[agent]
 
-            env_dir = DIRECTIONS[player.direction]
-
             observations[agent] = {
                 'player_num': player.num,
-                'direction': [env_dir[1], env_dir[0]] if not player.reset else (-1, -1),
+                'direction': DIRECTIONS[player.direction] if not player.reset else (-1, -1),
                 'resetting': player.reset,
-                'head': (player.pos[1], player.pos[0]),
+                'head': player.pos,
                 'energy': self.energies[player.num],
                 'speed': self.speeds[player.num],
-                # NOTE: see observation_space function
-                # "tail": player.path,
-                # "zone": player.zone,
             }
 
-            # TODO: High priority
-            # Implement rewards and infos discts
-            # NOTE: dones is false until hit max_episode_length
-            # or until the player is dead (i.e. board full, can't respawn)
             rewards[agent] = player.score
             dones[agent] = env_done
             infos[agent] = None
@@ -385,8 +366,14 @@ class PaperIO(ParallelEnv):
                 occ_num = self.player_num_grid[r,c]
 
                 if (cell in OCCUPIED_TARGS) or (occ_num != player.num):
-
-                    self.grid[r,c] = TEMP if cell == UNOCCUPIED else TEMP * BOMB if cell == BOMB else TEMP * BOOST if cell == BOOST else self.grid[r,c]
+                    if cell == UNOCCUPIED:
+                        self.grid[r,c] = TEMP
+                    elif cell == BOMB:
+                        self.grid[r,c] = TEMP * BOMB 
+                    elif cell == BOOST:
+                        self.grid[r,c] = TEMP * BOOST
+                    elif cell == OCCUPIED:
+                        self.grid[r,c] = TEMP * OCCUPIED
 
                     queue.extend([(r-1, c),(r+1, c),(r, c-1),(r, c+1)])
 
@@ -394,18 +381,22 @@ class PaperIO(ParallelEnv):
         grid_occupied_targ = np.logical_or(self.grid == UNOCCUPIED, grid_bomb_or_boost)
         grid_player_passed = np.logical_and(self.grid == PASSED, self.player_num_grid == player.num)
         enclosed = np.logical_or(grid_player_passed, grid_occupied_targ)
+        enclosed_occupied = self.grid == OCCUPIED
         enclosed_unoccupied = np.logical_or(grid_player_passed, self.grid == UNOCCUPIED)
 
         free_tile = self.grid == TEMP
         free_bomb = self.grid == TEMP * BOMB
         free_boost = self.grid == TEMP * BOOST
+        free_occupied = self.grid == TEMP * OCCUPIED
 
         self.grid[enclosed_unoccupied] = OCCUPIED
         self.player_num_grid[enclosed] = player.num
+        self.player_num_grid[enclosed_occupied] = player.num
 
         self.grid[free_tile] = UNOCCUPIED
         self.grid[free_bomb] = BOMB
         self.grid[free_boost] = BOOST
+        self.grid[free_occupied] = OCCUPIED
 
     def reset(
         self,
@@ -425,10 +416,6 @@ class PaperIO(ParallelEnv):
         np.random.seed(seed)
         random.seed(seed)
         
-        
-    # TODO: high priority
-    # make mode='rgb_array' more efficient
-    # add mode='human' support (pygame -- see luxai2022 comp for an example)
     def _init_render(self):
         if self.py_visualizer is None:
             self.py_visualizer = Visualizer(self.env_cfg.map_size)
@@ -456,17 +443,17 @@ class PaperIO(ParallelEnv):
         pygame.quit()
 
     # NOTE: seems redundant, all necessary board info already given to agent in observe()
-    # def state(self) -> np.ndarray:
-    #     """Returns the state.
+    def state(self) -> np.ndarray:
+        """Returns the state.
 
-    #     State returns a global view of the environment appropriate for
-    #     centralized training decentralized execution methods like QMIX
-    #     """
-    #     raise NotImplementedError(
-    #         "state() method has not been implemented in the environment {}.".format(
-    #             self.metadata.get("name", self.__class__.__name__)
-    #         )
-    #     )
+        State returns a global view of the environment appropriate for
+        centralized training decentralized execution methods like QMIX
+        """
+        raise NotImplementedError(
+            "state() method has not been implemented in the environment {}.".format(
+                self.metadata.get("name", self.__class__.__name__)
+            )
+        )
 
 
     

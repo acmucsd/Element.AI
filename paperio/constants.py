@@ -1,5 +1,5 @@
 """ Agent Values """
-DIRECTIONS = ((0,1), (1,0), (0,-1), (-1,0))
+DIRECTIONS = ((0,1), (-1,0), (0,-1), (1,0))
 VALID_MOVES = (-1, 0, 1)
 
 """ Environment Values """

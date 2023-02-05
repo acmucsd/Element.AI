@@ -11,7 +11,7 @@ class Player:
         self.dead = False
 
         """ Player Movement Location """
-        self.direction = 0 #random.randrange(0,4) # pick a random starting direction
+        self.direction = random.randrange(0,4) # pick a random starting direction
         self.reset = False
         self.last_unoccupied = False
 
@@ -34,4 +34,5 @@ class Player:
         self.pos = (x, y)
 
     def reset_player(self):
+        self.direction = random.randrange(0,4) # pick a random starting direction
         self.reset = True
