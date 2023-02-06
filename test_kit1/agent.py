@@ -13,10 +13,9 @@ class Agent():
         if obs['player_0']['resetting']:
             print(obs['player_0'], file=sys.stderr)
 
-        if self.moves_made < 2:
-            direction = -1
-        elif result[0] > 99 or result[1] > 99 or result[0] < 0 or result[1] < 0:
+        if self.moves_made == 10 or self.moves_made == 40 or self.moves_made == 50:
             direction = 1
+            # print(direction, file=sys.stderr)
         else:
             direction = 0
 
@@ -24,4 +23,5 @@ class Agent():
             'turn': direction
         }
         self.moves_made += 1
+
         return action
