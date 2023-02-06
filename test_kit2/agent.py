@@ -11,13 +11,15 @@ class Agent():
         obs, rewards, dones, infos = obs
         if obs['player_1']['resetting']:
             print(obs['player_1'], file=sys.stderr)
+
+        if (obs['player_0']['speed'] <= curr_step):
+            return { 'turn' : 0 }
         
         direction = 0
-        print(self.moves_made, file=sys.stderr)
         if self.moves_made < 2:
             direction = -1
-        # elif self.moves_made == 40 or self.moves_made == 60:
-        #     direction = -1
+        elif self.moves_made == 40 or self.moves_made == 60:
+            direction = -1
         else:
             direction = 0
 
