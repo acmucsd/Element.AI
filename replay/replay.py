@@ -9,7 +9,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Generate a replay script from a replay json file.")
-    parser.add_argument("file", nargs=1, help="The replay json file to convert to video.")
+    parser.add_argument("file", nargs=1, help="The replay json file to convert to video. Only one replay file at a time.")
 
     args = parser.parse_args()
 
