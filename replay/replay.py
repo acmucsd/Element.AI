@@ -31,6 +31,7 @@ def main():
 
     out = cv2.VideoWriter('output_video.mp4',cv2.VideoWriter_fourcc(*'mp4v'), 1, frameSize)
 
+    i = 1
     for obs in data['observations']:
 
         grid = np.array(obs['board']['board_state'])
@@ -45,6 +46,10 @@ def main():
         Numpy_rgb = obs_to_rgb(grid, player_num_grid, heads, num_agents=num_agents)
         Numpy_rgb = np.repeat(a=np.repeat(a=Numpy_rgb, repeats=scale_factor,axis=0), repeats=scale_factor, axis=1)
         out.write(Numpy_rgb) # write them to video output
+
+        progress_bar(i, len(data['observations']))
+
+        i += 1
 
     out.release() # release the video output
 
@@ -67,6 +72,16 @@ def obs_to_rgb(grid, player_num_grid, heads, num_agents=0):
     rgb_array[grid == BOOST] = PURPLE
 
     return rgb_array
+
+def progress_bar(current, total, bar_length=20):
+    fraction = current / total
+
+    arrow = int(fraction * bar_length - 1) * '-' + '>'
+    padding = int(bar_length - len(arrow)) * ' '
+
+    ending = '\n' if current == total else '\r'
+
+    print(f'Progress: [{arrow}{padding}] {int(fraction*100)}%', end=ending)
 
 
 if __name__ == '__main__':
