@@ -16,6 +16,7 @@ dependencies:
     - importlib-metadata==6.0.0
     - jax-jumpy==0.2.0
     - numpy
+    - opencv-python==4.7.0.68
     - pettingzoo==1.22.3
     - pillow==9.3.0
     - pycparser==2.21
