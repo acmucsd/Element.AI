@@ -1,12 +1,13 @@
 import pygame
 import numpy as np
+import sys
 from .constants import *
 
 class Visualizer:
     def __init__(self, size) -> None:
         # self.screen = pygame.display.set_mode((3*N*game_map.width, N*game_map.height))
         self.map_size = size
-        self.screen_size = (size*4, size*4)
+        self.screen_size = (size*8, size*8)
         self.tile_width = min(self.screen_size[0] // size, self.screen_size[1] // size)
         self.WINDOW_SIZE = (self.tile_width * size, self.tile_width * size)
         self.surf = pygame.Surface(self.WINDOW_SIZE)
