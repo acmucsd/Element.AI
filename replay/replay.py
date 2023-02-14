@@ -10,6 +10,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Generate a replay script from a replay json file.")
     parser.add_argument("file", nargs=1, help="The replay json file to convert to video. Only one replay file at a time.")
+    parser.add_argument("-o", "--out", help="Out file name (defaults to output_vid)", type=str, default='output_vid')
 
     args = parser.parse_args()
 
@@ -29,7 +30,7 @@ def main():
     scale_factor = 10
     frameSize = (map_size * scale_factor, map_size * scale_factor)
 
-    out = cv2.VideoWriter('output_video.mp4',cv2.VideoWriter_fourcc(*'mp4v'), 1, frameSize)
+    out = cv2.VideoWriter(f'{args.out}.mp4',cv2.VideoWriter_fourcc(*'mp4v'), 1, frameSize)
 
     i = 1
     for obs in data['observations']:
