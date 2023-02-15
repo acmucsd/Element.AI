@@ -16,10 +16,16 @@ class Agent():
             return { 'turn' : 0 }
         
         direction = 0
-        if self.moves_made < 2:
+        if self.moves_made < 22:
             direction = -1
-        elif self.moves_made == 40 or self.moves_made == 60:
-            direction = -1
+        elif self.moves_made == 65:
+            direction = 1
+        # elif self.moves_made == 65 or self.moves_made == 70 or self.moves_made == 80 or self.moves_made == 85:
+        #     direction = -1
+        # elif self.moves_made == 87:
+        #     direction = 1
+        # elif self.moves_made == 122:
+        #     direction = -1
         else:
             direction = 0
 
