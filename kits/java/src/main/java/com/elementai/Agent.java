@@ -1,7 +1,8 @@
 package com.elementai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.elementai.element.Obs;
+import com.elementai.element.Player;
+
 import java.util.Map;
 // import com.elementai.objectmapper.Mapper;
 
@@ -11,7 +12,7 @@ public class Agent {
 
     // private final Random random = new Random(2022);
 
-    public Obs obs;
+    public Map<String, Player> obs;
     public int iter;
     public int currStep;
     public int remainingOverageTime;
@@ -28,7 +29,7 @@ public class Agent {
 
         int turn = iter != 0 ? iter % 10 == 0 ? 1 : 0 : 0;
 
-        // System.err.println(rewards.get(player));
+        System.err.println("obs\t" + obs);
 
         return "{\"turn\": " + turn + "}";
     }

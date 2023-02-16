@@ -51,13 +51,14 @@ def agent(observation: dict, configuration):
         t.start()
     obs, rewards, _dones, _infos = from_json(json.loads(observation.obs))
     
-    board = obs['board']
-    obs = obs.pop('board')
+    board = obs.pop('board')
     abridgedObs = [None] * 4
 
+    print(obs, file=sys.stderr)
+
     for i in range(len(obs.keys())):
-        if (f'player_{i}' in obs):
-            abridgedObs.append(obs[f'player_{i}'])
+        if (f'player_{i}' in obs.keys()):
+            abridgedObs[i] = obs[f'player_{i}']
 
     data = json.dumps(copy.deepcopy(dict(
         player0=abridgedObs[0],

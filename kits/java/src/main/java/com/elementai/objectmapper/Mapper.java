@@ -3,13 +3,15 @@ package com.elementai.objectmapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import com.elementai.Agent;
 import com.elementai.element.State;
 import com.elementai.element.Player;
 // import com.elementai.element.Obs;
 // import com.elementai.element.Board;
-
-// import java.util.Map;
 
 public class Mapper {
 
@@ -26,10 +28,15 @@ public class Mapper {
         
         State state = objectMapper.readValue(json, State.class);
 
-        Player player0 = state.player0;
-        Player player1 = state.player1;
-        Player player2 = state.player2;
-        Player player3 = state.player2;
+        Player[] arr = { state.player0, state.player1, state.player2, state.player3 };
+
+        Map<String, Player> obs = new HashMap<String, Player>();
+        
+        for (int i = 0; i < arr.length; ++i)
+            if (arr[i] != null)
+                obs.put("player_" + i, arr[i]);
+
+        agent.obs = obs;
         
         agent.rewards = state.rewards;
 
