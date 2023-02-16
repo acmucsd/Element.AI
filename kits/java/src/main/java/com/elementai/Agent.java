@@ -11,6 +11,7 @@ public class Agent {
     // private final Random random = new Random(2022);
 
     public Obs obs;
+    public int[][] boardState;
     public int iter;
     public int currStep;
     public int remainingOverageTime;
@@ -18,7 +19,6 @@ public class Agent {
     // public Environment envConfig;
 
     public String act() throws JsonProcessingException {
-        System.err.println(obs + " " + iter + " " + currStep + " " + remainingOverageTime + " " + player);
         return null;
     }
 

@@ -23,6 +23,7 @@ public class Mapper {
         
         State state = objectMapper.readValue(json, State.class);
         agent.obs = state.obs;
+        agent.boardState = state.boardState;
         agent.iter = state.iter;
         agent.currStep = state.currStep;
         agent.remainingOverageTime = state.remainingOverageTime;

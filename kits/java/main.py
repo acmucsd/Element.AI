@@ -8,7 +8,7 @@ import atexit
 import os
 import sys
 from argparse import Namespace
-
+import numpy as np
 from tools.tools import process_obs, to_json, from_json, process_action
 
 agent_processes = defaultdict(lambda : None)
@@ -49,9 +49,9 @@ def agent(observation: dict, configuration):
         t = Thread(target=enqueue_output, args=(agent_process.stderr, q_stderr))
         t.daemon = True # thread dies with the program
         t.start()
-    obs = from_json(json.loads(observation.obs))
-    """dict(obs=[obs[0], obs[1]], """
-    data = json.dumps(copy.deepcopy(dict(iter=observation.step, curr_step=observation.curr_step, remainingOverageTime=observation.remainingOverageTime, player=observation.player)))
+    obs, rewards, _dones, _infos = from_json(json.loads(observation.obs))
+    print(np.where(np.array(obs['board']['board_state']) == 1), file=sys.stderr)
+    data = json.dumps(copy.deepcopy(dict(boardState=(np.array(obs['board']['board_state']).tolist()), iter=observation.step, curr_step=observation.curr_step, remainingOverageTime=observation.remainingOverageTime, player=observation.player)))
     agent_process.stdin.write(f"{data}\n".encode())
     agent_process.stdin.flush()
 
@@ -90,6 +90,6 @@ if __name__ == "__main__":
         i += 1
         actions = agent(observation, None)
 
-        print(actions, file=sys.stderr)
+        # print(actions, file=sys.stderr)
         # send actions to engine
         print(json.dumps(actions))
