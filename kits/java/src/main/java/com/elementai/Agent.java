@@ -16,9 +16,12 @@ public class Agent {
     public int remainingOverageTime;
     public String player;
 
+    public int[][] boardState;
+    public int[][] playersState;
+
     public String act() throws JsonProcessingException {
 
-        System.err.println(iter);
+        // System.err.println(iter);
 
         int turn = iter != 0 ? iter % 10 == 0 ? 1 : 0 : 0;
 
