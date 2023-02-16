@@ -11,12 +11,10 @@ public class Agent {
     // private final Random random = new Random(2022);
 
     public Obs obs;
-    public int[][] boardState;
     public int iter;
     public int currStep;
     public int remainingOverageTime;
     public String player;
-    // public Environment envConfig;
 
     public String act() throws JsonProcessingException {
         return null;
