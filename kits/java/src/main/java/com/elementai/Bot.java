@@ -25,7 +25,6 @@ public class Bot
     }
 
     public static String processing(Agent agent, String json) throws JsonProcessingException {
-        System.err.println("hello");
         Mapper.updateState(agent, json);            // Update state
         String jsonAction = null;
 

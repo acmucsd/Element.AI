@@ -17,7 +17,12 @@ public class Agent {
     public String player;
 
     public String act() throws JsonProcessingException {
-        return null;
+
+        System.err.println(iter);
+
+        int turn = iter != 0 ? iter % 10 == 0 ? 1 : 0 : 0;
+
+        return "{\"turn\": " + turn + "}";
     }
 
 }

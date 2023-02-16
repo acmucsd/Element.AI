@@ -50,7 +50,6 @@ def agent(observation: dict, configuration):
         t.daemon = True # thread dies with the program
         t.start()
     obs, rewards, _dones, _infos = from_json(json.loads(observation.obs))
-    print(np.where(np.array(obs['board']['board_state']) == 1), file=sys.stderr)
     data = json.dumps(copy.deepcopy(dict(
         boardState=(np.array(obs['board']['board_state']).tolist()),
         playersState=(np.array(obs['board']['players_state']).tolist()),
