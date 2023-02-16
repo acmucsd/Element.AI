@@ -50,7 +50,9 @@ def agent(observation: dict, configuration):
         t.daemon = True # thread dies with the program
         t.start()
     obs, rewards, _dones, _infos = from_json(json.loads(observation.obs))
+    # print(rewards, file=sys.stderr)
     data = json.dumps(copy.deepcopy(dict(
+        rewards=rewards,
         boardState=(np.array(obs['board']['board_state']).tolist()),
         playersState=(np.array(obs['board']['players_state']).tolist()),
         iter=observation.step, curr_step=observation.curr_step, remainingOverageTime=observation.remainingOverageTime, player=observation.player

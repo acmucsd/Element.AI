@@ -1,4 +1,5 @@
 package com.elementai.element;
+import java.util.Map;
 
 public class State {
 
@@ -8,6 +9,8 @@ public class State {
     public int currStep;
     public int remainingOverageTime;
     public String player;
+
+    public Map<String, Integer> rewards;
 
     public int[][] boardState;
     public int[][] playersState;

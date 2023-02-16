@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.elementai.Agent;
 import com.elementai.element.State;
-import com.elementai.element.Obs;
-import com.elementai.element.Board;
+// import com.elementai.element.Obs;
+// import com.elementai.element.Board;
 
 // import java.util.Map;
 
@@ -26,6 +26,8 @@ public class Mapper {
         State state = objectMapper.readValue(json, State.class);
 
         agent.obs = state.obs;
+        agent.rewards = state.rewards;
+
         agent.iter = state.iter;
         agent.currStep = state.currStep;
         agent.remainingOverageTime = state.remainingOverageTime;
