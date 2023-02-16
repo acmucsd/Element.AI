@@ -327,8 +327,8 @@ class PaperIO(ParallelEnv):
             infos[agent] = None
 
         observations['board'] = {
-            'board_state': np.copy(self.grid),
-            "players_state": np.copy(self.player_num_grid),
+            'board_state': np.copy(np.transpose(self.grid)),
+            "players_state": np.copy(np.transpose(self.player_num_grid)),
         }
 
         return observations, rewards, dones, infos
