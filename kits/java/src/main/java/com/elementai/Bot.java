@@ -27,12 +27,13 @@ public class Bot
         System.err.println("hi");
         Mapper.updateState(agent, json);            // Update state
         String jsonAction = null;
-        if (agent.obs.realEnvSteps < 0) {
-            // Do nothing
-        }
-        else {
-            jsonAction = agent.act();
-        }
+        // if (agent.obs.realEnvSteps < 0) {
+        //     // Do nothing
+        // }
+        // else {
+        //     jsonAction = agent.act();
+        // }
+        jsonAction = agent.act();
         if (jsonAction == null) {
             ObjectMapper objectMapper = new ObjectMapper();
             jsonAction = objectMapper.createObjectNode().toString();

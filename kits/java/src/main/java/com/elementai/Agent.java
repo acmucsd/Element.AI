@@ -2,13 +2,13 @@ package com.elementai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.elementai.element.Obs;
-import com.elementai.objectmapper.Mapper;
+// import com.elementai.objectmapper.Mapper;
 
-import java.util.Random;
+// import java.util.Random;
 
 public class Agent {
 
-    private final Random random = new Random(2022);
+    // private final Random random = new Random(2022);
 
     public Obs obs;
     public int iter;
