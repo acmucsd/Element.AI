@@ -54,8 +54,6 @@ def agent(observation: dict, configuration):
     board = obs.pop('board')
     abridgedObs = [None] * 4
 
-    print(obs, file=sys.stderr)
-
     for i in range(len(obs.keys())):
         if (f'player_{i}' in obs.keys()):
             abridgedObs[i] = obs[f'player_{i}']
@@ -108,6 +106,5 @@ if __name__ == "__main__":
         i += 1
         actions = agent(observation, None)
 
-        # print(actions, file=sys.stderr)
         # send actions to engine
         print(json.dumps(actions))

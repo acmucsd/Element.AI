@@ -8,29 +8,37 @@ import java.util.Map;
 
 // import java.util.Random;
 
-public class Agent {
-
-    // private final Random random = new Random(2022);
-
-    public Map<String, Player> obs;
+public class Agent {    
     public int iter;
     public int currStep;
     public int remainingOverageTime;
     public String player;
 
-    public Map<String, Integer> rewards;
-
+    public Map<String, Player> obs;
     public int[][] boardState;
     public int[][] playersState;
 
+    public Map<String, Integer> rewards;
+
     public String act() throws JsonProcessingException {
 
-        // System.err.println(iter);
+        /* -----------------------------------------------------
+         * DO NOT CHANGE ANY CODE ABOVE THIS LINE
+         */ 
+
+
+        /*
+         * YOUR BOT GOES HERE. Remember to set turn = -1, 0, or 1
+         */
+
 
         int turn = iter != 0 ? iter % 10 == 0 ? 1 : 0 : 0;
 
-        System.err.println("obs\t" + obs);
+        // NOTE: ALWAYS use formatAction() when returning a turn value
+        return formatAction(turn);
+    }
 
+    public String formatAction(int turn) {
         return "{\"turn\": " + turn + "}";
     }
 
