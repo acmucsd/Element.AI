@@ -3,7 +3,10 @@ import java.util.Map;
 
 public class State {
 
-    public Obs obs;
+    public Player player0;
+    public Player player1;
+    public Player player2;
+    public Player player3;
 
     public int iter;
     public int currStep;

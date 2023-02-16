@@ -1,6 +1,7 @@
 com/elementai/element/State.class
 com/elementai/Bot.class
 com/elementai/Agent.class
+com/elementai/element/Player.class
 com/elementai/element/Board.class
 com/elementai/element/Obs.class
 com/elementai/objectmapper/Mapper.class

@@ -50,11 +50,23 @@ def agent(observation: dict, configuration):
         t.daemon = True # thread dies with the program
         t.start()
     obs, rewards, _dones, _infos = from_json(json.loads(observation.obs))
-    # print(rewards, file=sys.stderr)
+    
+    board = obs['board']
+    obs = obs.pop('board')
+    abridgedObs = [None] * 4
+
+    for i in range(len(obs.keys())):
+        if (f'player_{i}' in obs):
+            abridgedObs.append(obs[f'player_{i}'])
+
     data = json.dumps(copy.deepcopy(dict(
+        player0=abridgedObs[0],
+        player1=abridgedObs[1],
+        player2=abridgedObs[2],
+        player3=abridgedObs[3],
         rewards=rewards,
-        boardState=(np.array(obs['board']['board_state']).tolist()),
-        playersState=(np.array(obs['board']['players_state']).tolist()),
+        boardState=(np.array(board['board_state']).tolist()),
+        playersState=(np.array(board['players_state']).tolist()),
         iter=observation.step, curr_step=observation.curr_step, remainingOverageTime=observation.remainingOverageTime, player=observation.player
     )))
     agent_process.stdin.write(f"{data}\n".encode())
