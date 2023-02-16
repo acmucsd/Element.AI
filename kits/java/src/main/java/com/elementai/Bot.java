@@ -34,10 +34,11 @@ public class Bot
         //     jsonAction = agent.act();
         // }
         jsonAction = agent.act();
-        if (jsonAction == null) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonAction = objectMapper.createObjectNode().toString();
-        }
+        // if (jsonAction == null) {
+        //     ObjectMapper objectMapper = new ObjectMapper();
+        //     jsonAction = objectMapper.createObjectNode().toString();
+        // }
+        System.err.println(jsonAction);
         return jsonAction;
     }
 }

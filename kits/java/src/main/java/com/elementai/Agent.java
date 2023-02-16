@@ -18,7 +18,7 @@ public class Agent {
     // public Environment envConfig;
 
     public String act() throws JsonProcessingException {
-        return "{'turn': 0}";
+        return "{\"turn\": 0}";
     }
 
 }

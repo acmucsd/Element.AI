@@ -20,22 +20,13 @@ public class Mapper {
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         // check first step
         System.err.println(json);
-        if (agent.obs == null) {
-
-            State state = objectMapper.readValue(json, State.class);
-            agent.obs = state.obs;
-            agent.iter = state.iter;
-            agent.currStep = state.currStep;
-            agent.remainingOverageTime = state.remainingOverageTime;
-            agent.player = state.player;
-        }
-        else {
-            State state = objectMapper.readValue(json, State.class);
-            agent.iter = state.iter;
-            agent.remainingOverageTime = state.remainingOverageTime;
-            agent.obs.playerData = state.obs.playerData;
-            agent.obs.realEnvSteps = state.obs.realEnvSteps;
-        }
+        
+        // State state = objectMapper.readValue(json, State.class);
+        // agent.obs = state.obs;
+        // agent.iter = state.iter;
+        // agent.currStep = state.currStep;
+        // agent.remainingOverageTime = state.remainingOverageTime;
+        // agent.player = state.player;
     }
 
 }

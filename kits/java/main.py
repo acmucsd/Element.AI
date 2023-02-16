@@ -1,3 +1,4 @@
+import copy
 import json
 from subprocess import Popen, PIPE
 from threading  import Thread
@@ -6,6 +7,10 @@ from collections import defaultdict
 import atexit
 import os
 import sys
+from argparse import Namespace
+
+from tools.tools import process_obs, to_json, from_json, process_action
+
 agent_processes = defaultdict(lambda : None)
 t = None
 q_stderr = None
@@ -21,7 +26,8 @@ def enqueue_output(out, queue):
     for line in iter(out.readline, b''):
         queue.put(line)
     out.close()
-def agent(observation, configuration):
+def agent(observation: dict, configuration):
+
     """
     a wrapper around a non-python agent
     """
@@ -30,7 +36,7 @@ def agent(observation, configuration):
     agent_process = agent_processes[observation.player]
     ### Do not edit ###
     if agent_process is None:
-        if "__raw_path__" in configuration:
+        if configuration != None and "__raw_path__" in configuration:
             cwd = os.path.dirname(configuration["__raw_path__"])
         else:
             cwd = os.path.dirname(__file__)
@@ -43,7 +49,9 @@ def agent(observation, configuration):
         t = Thread(target=enqueue_output, args=(agent_process.stderr, q_stderr))
         t.daemon = True # thread dies with the program
         t.start()
-    data = json.dumps(dict(obs=json.loads([observation.obs[0], observation.obs[1]]), iter=observation.step, curr_step=observation.curr_step, remainingOverageTime=observation.remainingOverageTime, player=observation.player))
+    obs = from_json(json.loads(observation.obs))
+    """dict(obs=[obs[0], obs[1]], """
+    data = json.dumps(copy.deepcopy(dict(iter=observation.step, curr_step=observation.curr_step, remainingOverageTime=observation.remainingOverageTime, player=observation.player)))
     agent_process.stdin.write(f"{data}\n".encode())
     agent_process.stdin.flush()
 
@@ -59,3 +67,27 @@ def agent(observation, configuration):
     if agent1res == "":
         return {}
     return json.loads(agent1res)
+
+if __name__ == "__main__":
+    
+    def read_input():
+        """
+        Reads input from stdin
+        """
+        try:
+            return input()
+        except EOFError as eof:
+            raise SystemExit(eof)
+    step = 0
+    player_id = 0
+    configurations = None
+    i = 0
+    while True:
+        inputs = read_input()
+        obs = json.loads(inputs)
+        
+        observation = Namespace(**dict(step=obs["step"], curr_step=obs['curr_step'], obs=json.dumps(obs["obs"]), remainingOverageTime=obs["remainingOverageTime"], player=obs["player"], info=obs["info"]))
+        i += 1
+        actions = agent(observation, None)
+        # send actions to engine
+        print(json.dumps(actions))
