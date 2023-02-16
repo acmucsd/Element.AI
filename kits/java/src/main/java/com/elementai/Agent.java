@@ -18,7 +18,8 @@ public class Agent {
     // public Environment envConfig;
 
     public String act() throws JsonProcessingException {
-        return "{\"turn\": 0}";
+        System.err.println(obs + " " + iter + " " + currStep + " " + remainingOverageTime + " " + player);
+        return null;
     }
 
 }

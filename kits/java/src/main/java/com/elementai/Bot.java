@@ -15,11 +15,12 @@ public class Bot
 {
     public static void main( String[] args ) throws IOException {
         Agent agent = new Agent();
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            String jsonIn = scanner.nextLine();             // Read input
-            String jsonOut = processing(agent, jsonIn);     // Main function
-            System.out.println(jsonOut);                    // Output command
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (true) {
+                String jsonIn = scanner.nextLine();             // Read input
+                String jsonOut = processing(agent, jsonIn);     // Main function
+                System.out.println(jsonOut);                    // Output command
+            }
         }
     }
 
@@ -27,18 +28,13 @@ public class Bot
         System.err.println("hi");
         Mapper.updateState(agent, json);            // Update state
         String jsonAction = null;
-        // if (agent.obs.realEnvSteps < 0) {
-        //     // Do nothing
-        // }
-        // else {
-        //     jsonAction = agent.act();
-        // }
+
         jsonAction = agent.act();
-        // if (jsonAction == null) {
-        //     ObjectMapper objectMapper = new ObjectMapper();
-        //     jsonAction = objectMapper.createObjectNode().toString();
-        // }
-        System.err.println(jsonAction);
+        
+        if (jsonAction == null) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            jsonAction = objectMapper.createObjectNode().toString();
+        }
         return jsonAction;
     }
 }

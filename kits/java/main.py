@@ -89,5 +89,7 @@ if __name__ == "__main__":
         observation = Namespace(**dict(step=obs["step"], curr_step=obs['curr_step'], obs=json.dumps(obs["obs"]), remainingOverageTime=obs["remainingOverageTime"], player=obs["player"], info=obs["info"]))
         i += 1
         actions = agent(observation, None)
+
+        print(actions, file=sys.stderr)
         # send actions to engine
         print(json.dumps(actions))

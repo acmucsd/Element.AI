@@ -19,14 +19,14 @@ public class Mapper {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         // check first step
-        System.err.println(json);
+        // System.err.println(json);
         
-        // State state = objectMapper.readValue(json, State.class);
-        // agent.obs = state.obs;
-        // agent.iter = state.iter;
-        // agent.currStep = state.currStep;
-        // agent.remainingOverageTime = state.remainingOverageTime;
-        // agent.player = state.player;
+        State state = objectMapper.readValue(json, State.class);
+        agent.obs = state.obs;
+        agent.iter = state.iter;
+        agent.currStep = state.currStep;
+        agent.remainingOverageTime = state.remainingOverageTime;
+        agent.player = state.player;
     }
 
 }

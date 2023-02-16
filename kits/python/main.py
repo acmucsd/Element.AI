@@ -1,7 +1,7 @@
 import json
 from typing import Dict
 from argparse import Namespace
-
+import sys
 from agent import Agent
 from tools.tools import process_obs, to_json, from_json, process_action
 ### DO NOT REMOVE THE FOLLOWING CODE ###
@@ -52,5 +52,7 @@ if __name__ == "__main__":
         observation = Namespace(**dict(step=obs["step"], curr_step=obs['curr_step'], obs=json.dumps(obs["obs"]), remainingOverageTime=obs["remainingOverageTime"], player=obs["player"], info=obs["info"]))
         i += 1
         actions = agent_fn(observation)
+
+        print(json.dumps(actions), file=sys.stderr)
         # send actions to engine
         print(json.dumps(actions))
