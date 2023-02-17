@@ -23,8 +23,6 @@ public class Mapper {
     public static void updateState(Agent agent, String json) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        // check first step
-        // System.err.println(json);
         
         State state = objectMapper.readValue(json, State.class);
 

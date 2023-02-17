@@ -106,5 +106,6 @@ if __name__ == "__main__":
         i += 1
         actions = agent(observation, None)
 
+        print(json.dumps(actions), file=sys.stderr)
         # send actions to engine
         print(json.dumps(actions))
