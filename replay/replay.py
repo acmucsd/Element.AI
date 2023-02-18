@@ -35,8 +35,8 @@ def main():
     i = 1
     for obs in data['observations']:
 
-        grid = np.array(obs['board']['board_state'])
-        player_num_grid = np.array(obs['board']['players_state'])
+        grid = np.transpose(np.array(obs['board']['board_state']))
+        player_num_grid = np.transpose(np.array(obs['board']['players_state']))
         num_agents = len(obs.keys()) - 1
 
         heads = []

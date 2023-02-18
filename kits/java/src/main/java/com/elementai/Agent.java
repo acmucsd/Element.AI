@@ -31,6 +31,10 @@ public class Agent {
          * YOUR BOT GOES HERE. Remember to set turn = -1, 0, or 1
          */
 
+        int speed = obs.get(player).speed;
+
+        if (speed <= currStep)
+            return formatAction(0);
 
         int turn = iter != 0 ? iter % 10 == 0 ? 1 : 0 : 0;
 
