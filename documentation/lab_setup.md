@@ -4,7 +4,7 @@
 
 - **When you log in**
   - Run `conda init`
-  - Go to [https://128.54.69.221:3000](https://128.54.69.221:3000) into your browser of choice and log in with your ACM AI account. This is where you'll upload submissions.
+  - Go to [http://128.54.69.222:3000](http://128.54.69.222:3000) into your browser of choice and log in with your ACM AI account. This is where you'll upload submissions.
 - **When the repo is made available**
   - ctrl+shift+p
   - in the bar, type Python: Select Interpreter
