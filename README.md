@@ -1,6 +1,6 @@
 # <img src='./elementlogo.gif' width='100%' alt='Element AI Logo' />
 
-Welcome to ACM AI's Winter 2022 competition, Element.AI!
+Welcome to ACM AI's Winter 2023 competition, Element.AI!
 
 ## Usage
 
@@ -18,6 +18,9 @@ The args are as follows:
 - `-v`&emsp;Verbose Level (0 = silent, 1 = errors, 2 = warnings, 3 = info)
 - `-s`&emsp;Seeds the environment. Useful for testing edge cases.
 - `--render`&emsp;Turns on rendering. NOTE: purposefully slows down running so that the user can keep up visually.
+
+## Evaluation
+During the competition when submissions are open, we will run a live, trueskill ranked leaderboard that uses every team's latest verified submission. After 6:30PM we will use the leaderboard to seed a double elimination knockout bracket and crown winners based on the results of that.
 
 ## Documentation
 
