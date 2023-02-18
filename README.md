@@ -24,9 +24,9 @@ During the competition when submissions are open, we will run a live, trueskill 
 
 ## Documentation
 
-- The [Graphic Documentation]() contains explanations of the game rules.
-- [obs_and_act.md]() contains detailed explanation of the observation and action spaces.
-- The [Submission Portal Documentation]() contains an explanation on how to upload submissions.
+- The [Graphic Documentation](./documentation/Element.AI%20Documentation.pdf) contains explanations of the game rules.
+- [obs_and_act.md](./documentation/obs_and_act.md)) contains detailed explanation of the observation and action spaces.
+- The [Submission Portal Documentation](./documentation/submission.md) contains an explanation on how to upload submissions.
 - The root directory, the replay directory, and the kits each have `README.md`'s which the player should read.
 
 ## Development Kits

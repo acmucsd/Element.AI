@@ -1,12 +1,12 @@
 # Actions and Observations
 
-Please refer to the [Graphic Documentation]() for a more in-depth explanation of game rules with visuals. Notably, the [Graphic Documentation]() does not include the following information about action and observation structure/logic.
+Please refer to the [Graphic Documentation](./documentation/Element.AI%20Documentation.pdf) for a more in-depth explanation of game rules with visuals. Notably, the [Graphic Documentation](./documentation/Element.AI%20Documentation.pdf) does not include the following information about action and observation structure/logic.
 
 Please refer to the `README.md`'s in the root directory, the replay directory, and each kit for usage instructions.
 
 ## Observations
 
-- the difference between `iter` and `curr_step` **(very important)** are defined in the [Graphic Documentation]()
+- the difference between `iter` and `curr_step` **(very important)** are defined in the [Graphic Documentation](./documentation/Element.AI%20Documentation.pdf)
 - `rewards` is a dictionary where each `rewards['player_[num]']` returns the total points for that player so far
 - `obs` is the observation, which tells you the state of the environment. It is structured as follows:
 
