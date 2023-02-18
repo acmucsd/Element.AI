@@ -32,7 +32,7 @@ class Bot:
         self.proc = BotProcess(self.command, self.main_file_path, verbose=verbose, direct_import_python_bots=direct_import_python_bots)
         # timing
         self.remainingOverageTime = 10
-        self.time_per_step = 2
+        self.time_per_step = 1
 
         self.log = Logger(identifier=f"{self.agent}, {self.main_file_path}",verbosity=verbose)
 
