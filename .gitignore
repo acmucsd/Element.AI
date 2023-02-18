@@ -9,3 +9,7 @@ hidden/
 deprecated/
 
 kits/java/target/
+
+test/
+output_vid
+test.json
