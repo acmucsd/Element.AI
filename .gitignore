@@ -11,5 +11,5 @@ deprecated/
 kits/java/target/
 
 test/
-output_vid
+output_vid.mp4
 test.json
