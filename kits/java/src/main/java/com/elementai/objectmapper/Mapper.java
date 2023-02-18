@@ -10,8 +10,6 @@ import java.util.Map;
 import com.elementai.Agent;
 import com.elementai.element.State;
 import com.elementai.element.Player;
-// import com.elementai.element.Obs;
-// import com.elementai.element.Board;
 
 public class Mapper {
 
