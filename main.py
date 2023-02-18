@@ -18,7 +18,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Run the Element AI game.")
     parser.add_argument("players", nargs="+", help="Paths to player modules. If --tournament is passed as well, you can also pass a folder and we will look through all sub-folders for valid agents with main.py files (only works for python agents at the moment).")
-    parser.add_argument("-l", "--len", help="Max episode length", type=int, default=300)
+    parser.add_argument("-l", "--len", help="Max episode length", type=int, default=500)
 
     # replay configs
     parser.add_argument("-o", "--output", help="Where to output replays. Default is none and no replay is generated")

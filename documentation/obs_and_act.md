@@ -2,12 +2,12 @@
 
 Please refer to the [Graphic Documentation]() for a more in-depth explanation of game rules with visuals. Notably, the [Graphic Documentation]() does not include the following information about action and observation structure/logic.
 
-Please refer to the `README.md`'s in the root directory and each kit for usage instructions.
+Please refer to the `README.md`'s in the root directory, the replay directory, and each kit for usage instructions.
 
 ## Observations
 
 - the difference between `iter` and `curr_step` **(very important)** are defined in the [Graphic Documentation]()
-- `reward` is a dictionary where each `reward['player_[num]']` returns the total points for that player so far
+- `rewards` is a dictionary where each `rewards['player_[num]']` returns the total points for that player so far
 - `obs` is the observation, which tells you the state of the environment. It is structured as follows:
 
 
@@ -47,13 +47,13 @@ NOTE: The Java Kit does *not* include `board`. In the Java kit, both nxn arrays 
 
 Take point `(x,y)`.
 
-If you are in a python bot, say you defined:
+If you are using a python kit, say you defined:
 ```
 boardState = obs['board']['board_state']
 playersState = obs['board']['players_state']
 ```
 
-Note both kits have the following values predefined:
+If you are using a Java kit, the above are defined for you. Note both kits have the following values predefined:
 ```
 TEMP = -1
 UNOCCUPIED = 0
@@ -72,7 +72,7 @@ if (boardState[x][y] == TAIL):
     # it is the tail of the player with playerNum == playersState[x][y]
 
 if (boardState[x][y] == TERRITORY):
-    # it is the tail of the player with playerNum == playersState[x][y]
+    # it is the territory of the player with playerNum == playersState[x][y]
 
 if (boardState[x][y] == BOMB):
     if (playersState[x][y] != TEMP):
