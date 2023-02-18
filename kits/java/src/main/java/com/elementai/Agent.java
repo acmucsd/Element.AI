@@ -4,11 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.elementai.element.Player;
 
 import java.util.Map;
-// import com.elementai.objectmapper.Mapper;
 
-// import java.util.Random;
+public class Agent {
 
-public class Agent {    
+    // -----------------------------------
+    // USEFUL CONSTANTS
+
     public final int TEMP = -1;
     public final int UNOCCUPIED = 0;
     public final int TAIL = 1;
@@ -16,6 +17,11 @@ public class Agent {
     public final int BOMB = 3;
     public final int BOOST = 4;
 
+    // -----------------------------------
+
+
+    // -----------------------------------
+    // DO NOT ALTER THIS CODE
 
     public int iter;
     public int currStep;
@@ -28,14 +34,11 @@ public class Agent {
 
     public Map<String, Integer> rewards;
 
+    // -----------------------------------
+
     private int timesMoved = 0;
 
     public String act() throws JsonProcessingException {
-
-        /* -----------------------------------------------------
-         * DO NOT CHANGE ANY CODE ABOVE THIS LINE
-         */ 
-
 
         /*
          * YOUR BOT GOES HERE. Remember to set turn = -1, 0, or 1

@@ -1,12 +1,18 @@
 import numpy as np
 import sys
 
+
+# -----------------------------------
+# USEFUL CONSTANTS
+
 TEMP = -1
 UNOCCUPIED = 0
 TAIL = 1
 TERRITORY = 2
 BOMB = 3
 BOOST = 4
+
+# -----------------------------------
 
 class Agent():
     def __init__(self, player: str) -> None:
