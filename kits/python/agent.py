@@ -17,8 +17,6 @@ BOOST = 4
 class Agent():
     def __init__(self, player: str) -> None:
         self.player = player
-        self.last_reward = -1
-        np.random.seed(0)
         self.times_moved = 0
 
     def formatAction(self, turn: int):
