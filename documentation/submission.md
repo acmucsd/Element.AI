@@ -5,15 +5,15 @@ To submit, make sure to be in the same directory as your main.py file. You can u
 
 Then run `tar -cvzf submission.tar.gz *` to create a **submission.tar.gz** file that forms your submission. **Remember to remove the previous one if you ran this before**.
 
-The submission portal is available at [http://128.54.69.221:3000/competitions/Element.AI](http://128.54.69.221:3000/competitions/Element.AI).
+The submission portal is available at [http://128.54.69.222:3000/competitions/Element.AI](http://128.54.69.222:3000/competitions/Element.AI).
 
 To submit, you must
 1. log into your ACM AI account (only one team member needs to do this)
 2. click register and register yourself if you haven't already
-3. go to the [teams page](http://128.54.69.221:3000/competitions/Element.AI/teams) and create yourself a team with a unique team name (you can't change this!)
-4. from here you can check the current [leaderboard](http://128.54.69.221:3000/competitions/Element.AI/leaderboard), your team, and submit your bot's submission.tar.gz file.
+3. go to the [teams page](http://128.54.69.222:3000/competitions/Element.AI/teams) and create yourself a team with a unique team name (you can't change this!)
+4. from here you can check the current [leaderboard](http://128.54.69.222:3000/competitions/Element.AI/leaderboard), your team, and submit your bot's submission.tar.gz file.
 
-On the [submission page](http://128.54.69.221:3000/competitions/Element.AI/upload), you can add a description (recommended! name your bot here) and upload the bot. To upload, click `click to add file` and find your submission.tar.gz file. Then click `Submit` at the bottom and wait until you get the "Submission Uploaded Succesfully" message at the top. It will then autoredirect you to the main page.
+On the [submission page](http://128.54.69.222:3000/competitions/Element.AI/upload), you can add a description (recommended! name your bot here) and upload the bot. To upload, click `click to add file` and find your submission.tar.gz file. Then click `Submit` at the bottom and wait until you get the "Submission Uploaded Succesfully" message at the top. It will then autoredirect you to the main page.
 
 ## Evaluation
 
