@@ -23,7 +23,7 @@ public class Agent {
     // -----------------------------------
     // DO NOT ALTER THIS CODE
 
-    public int iter;
+    public int iteration;
     public int currStep;
     public int remainingOverageTime;
     public String player;

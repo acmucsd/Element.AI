@@ -36,7 +36,7 @@ public class Mapper {
         
         agent.rewards = state.rewards;
 
-        agent.iter = state.iter;
+        agent.iteration = state.iteration;
         agent.currStep = state.currStep;
         agent.remainingOverageTime = state.remainingOverageTime;
         agent.player = state.player;

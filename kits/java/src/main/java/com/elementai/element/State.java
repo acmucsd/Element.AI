@@ -8,7 +8,7 @@ public class State {
     public Player player2;
     public Player player3;
 
-    public int iter;
+    public int iteration;
     public int currStep;
     public int remainingOverageTime;
     public String player;
