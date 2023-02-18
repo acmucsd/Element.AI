@@ -2,6 +2,10 @@
 
 Welcome to ACM AI's Winter 2023 competition, Element.AI!
 
+We **highly encourage you** to read the following instructions!
+
+To check the current leadeboard, go to [http://128.54.69.221:3000/competitions/Element.AI/leaderboard](http://128.54.69.221:3000/competitions/Element.AI/leaderboard)
+
 ## Usage
 
 If you are participating in the competition in the basement labs, please refer to `documentation/lab_setup.md` to set up your lab machine.
@@ -20,7 +24,9 @@ The args are as follows:
 - `--render`&emsp;Turns on rendering. NOTE: purposefully slows down running so that the user can keep up visually.
 
 ## Evaluation
-During the competition when submissions are open, we will run a live, trueskill ranked leaderboard that uses every team's latest verified submission. After 6:30PM we will use the leaderboard to seed a double elimination knockout bracket and crown winners based on the results of that.
+During the competition when submissions are open, we will run a live, trueskill ranked leaderboard that uses every team's latest verified submission. After 6:30PM we will use the leaderboard to seed a double elimination knockout bracket and crown winners based on the results of that. See [./documentation/submission.md](./documentation/submission.md) for specific details.
+
+Make sure to submit your agent to the leaderboard early to test it! Any agent that fails to run will automatically lose their games, including in the knockout rounds. There are no exceptions.
 
 ## Documentation
 
