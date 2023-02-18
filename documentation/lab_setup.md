@@ -8,9 +8,9 @@
 - **When the repo is made available**
   - ctrl+shift+p
   - in the bar, type Python: Select Interpreter
-  - when it prompts you to enter a path, paste in `home/linux/ieng6/icpc23/public/ai-env`
+  - when it prompts you to enter a path, paste in `/home/linux/ieng6/icpc23/public/ai-env`
 - **When you begin coding**
-  - `conda activate home/linux/ieng6/icpc23/public/ai-env`
+  - `conda activate /home/linux/ieng6/icpc23/public/ai-env`
 
 
 ## Sanity Checks
