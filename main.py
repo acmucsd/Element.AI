@@ -58,16 +58,20 @@ def main():
             ),
             render=args.render,
         )
-
-    import time
-    stime = time.time()
-    eps = Episode(
-        cfg=cfg
-    )
-    rewards = asyncio.run(eps.run())
-    etime = time.time()
-    import json
-    out = json.dumps(rewards)
-    print(out)
+    try:
+        import time
+        stime = time.time()
+        eps = Episode(
+            cfg=cfg
+        )
+        rewards = asyncio.run(eps.run())
+        etime = time.time()
+        import json
+        rewards["status"] = "success"
+        out = json.dumps(rewards)
+        print(out)
+    except:
+        print({"status": "fail"})
+        exit()
 if __name__ == "__main__":
     main()
