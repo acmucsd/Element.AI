@@ -8,7 +8,22 @@ To check the current leadeboard, go to [http://128.54.69.222:3000/competitions/E
 
 ## Usage
 
-If you are participating in the competition in the basement labs, please refer to `documentation/lab_setup.md` to set up your lab machine.
+**If you are participating in the competition in the basement labs**, please refer to `documentation/lab_setup.md` to set up your lab machine.
+
+Otherwise, please make dure you have the following installed on your system:
+
+```
+Python                  Suggested 3.9.16
+Conda                   Suggested 22.11.1
+Java                    Suggested 19.0.2
+Apache Maven            Suggested 3.9.0
+```
+
+Then, in the root directory of the competiiton, you must run:
+
+```
+conda env create -f environment.yml
+```
 
 Then, you can run the following to start your first game!
 ```
@@ -21,7 +36,13 @@ The args are as follows:
 - `-o`&emsp;The desired name of the replay file. Note: the `.json` extension will be added by default.
 - `-v`&emsp;Verbose Level (0 = silent, 1 = errors, 2 = warnings, 3 = info)
 - `-s`&emsp;Seeds the environment. Useful for testing edge cases.
-- `--render`&emsp;Turns on rendering. NOTE: purposefully slows down running so that the user can keep up visually.
+- `--render`&emsp;Turns on simple rendering. NOTE: purposefully slows down running so that the user can keep up visually.
+
+## Replays
+
+Instructions on generating simple video replays (similar to the Pygame window from `--render` are available in the `replay` directory).
+
+If you'd like nicer video replays, please check out https://github.com/jonahsoong/Element.AI-Visualizer. We will incorporate this Visualizer into this repo soon.
 
 ## Evaluation
 During the competition when submissions are open, we will run a live, trueskill ranked leaderboard that uses every team's latest verified submission. After 6:30PM we will use the leaderboard to seed a double elimination knockout bracket and crown winners based on the results of that. See [./documentation/submission.md](./documentation/submission.md) for specific details.
@@ -38,6 +59,8 @@ Make sure to submit your agent to the leaderboard early to test it! Any agent th
 ## Development Kits
 
 The Java and Python kits are located in the `kits` directory.
+
+We will be adding select player submissions as example bots shortly.
 
 ## Prizes
 
