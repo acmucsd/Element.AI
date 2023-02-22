@@ -4,7 +4,7 @@ Welcome to ACM AI's Winter 2023 competition, Element.AI!
 
 We **highly encourage you** to read the following instructions!
 
-To check the current leadeboard, go to [http://ai.acmucsd.com/competitions/Element.AI/leaderboard](http://128.54.69.222:3000/competitions/Element.AI/leaderboard)
+To check the current leadeboard, go to [http://ai.acmucsd.com/competitions/Element.AI/leaderboard](http://ai.acmucsd.com/competitions/Element.AI/leaderboard)
 
 ## Usage
 
